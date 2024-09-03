@@ -5,22 +5,22 @@ COMPOSE_FILE=docker-compose.yml
 
 # Target to bring up the Docker Compose services
 up:
-	docker-compose -f $(COMPOSE_FILE) up -d
+	docker compose -f $(COMPOSE_FILE) up -d
 
 # Target to bring down the Docker Compose services
 down:
-	docker-compose -f $(COMPOSE_FILE) down
+	docker compose -f $(COMPOSE_FILE) down
 
 # Optional target to show the status of Docker Compose services
 status:
-	docker-compose -f $(COMPOSE_FILE) ps
+	docker compose -f $(COMPOSE_FILE) ps
 
 # Optional target to view logs of Docker Compose services
 logs:
-	docker-compose -f $(COMPOSE_FILE) logs
+	docker compose -f $(COMPOSE_FILE) logs
 
 restart:
-	docker-compose -f $(COMPOSE_FILE) down && docker-compose -f $(COMPOSE_FILE) up -d
+	docker compose -f $(COMPOSE_FILE) down && docker-compose -f $(COMPOSE_FILE) up -d
 
 # Target to run the Flask web application
 web_legacy:
