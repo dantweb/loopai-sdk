@@ -1,6 +1,10 @@
 /.git/
 /.venv/
+/.idea/
 /.env
+.env
+!.env.dist
 /core/*
 /view/*
 /web/*
+/tests/_data/output/*
