@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: loopai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8088:8080"
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.web
+    container_name: loopai_web
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    logging:
+      driver: "syslog"  # Using syslog driver
+      options:
+        syslog-address: "udp://localhost:514"  # Address of the syslog server
+        tag: "loopai_web"  # Optional tag for log identification
+
+
+  frontend:
+    build:
+      context: ./view/vue/admin
+      dockerfile: Dockerfile.frontend
+    container_name: vue_admin
+    ports:
+      - "8081:80"
+
+volumes:
+  postgres_data:
+    driver: local

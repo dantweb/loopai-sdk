@@ -1,0 +1,74 @@
+session:
+  name: test_session_1
+  environment:
+  loop:
+    step1:
+      description: "Generating text"
+      type: gpt
+      input:
+        type: text
+        source: input/task-description.txt
+      output:
+        - file:
+            name: %SESSIONID%-step1.txt
+        - broadcast
+      action:
+        executor: gpt
+        model: gpt-3.5-turbo
+        prompt: PROMPT_STEP_1
+
+    step2:
+      description: "Generating first image"
+      type: gpt
+      input:
+        type: broadcast
+        source: step1
+      output:
+        - image:
+            name: %SESSIONID%-step2.png
+        - broadcast
+      action:
+        executor: gpt
+        model: dall-e-3
+        prompt: PROMPT_STEP_2
+
+      step3:
+        description: "Generating second image"
+        type: local-neural-network
+        input:
+          type: broadcast
+          source: step1
+        output:
+          - image:
+              name: %SESSIONID%-step3.png
+          - broadcast
+        action:
+          executor: local_nn
+          model: local_model
+          prompt: PROMPT_STEP_3
+
+        step4:
+          description: "Publishing"
+          type: wordpress
+          input:
+            - broadcast:
+                source: step1
+            - file:
+                source: %SESSIONID%-step2.png
+            - file:
+                source: %SESSIONID%-step3.png
+          output:
+            - wordpress
+            - broadcast
+          action:
+            executor: wordpress
+            model: dall-e-3
+            prompt: PROMPT_STEP_2
+
+        step5:
+          description: "Sharing"
+          type: social_share
+          input:
+            - broadcast
+            - file:
+                  source: %SESSIONID%-step1.png
