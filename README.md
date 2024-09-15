@@ -21,7 +21,6 @@ git clone git@github.com:dantweb/loopai-sdk.git && cd loopai-sdk
   flask --app web/web_interface run
 ```
 
-
  in the backend container:
 
 ```bash
