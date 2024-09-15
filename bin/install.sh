@@ -40,8 +40,6 @@ clean_and_clone_repo() {
     if [ -n "$preserve_subdir" ] && [ -d "/tmp/$preserve_subdir" ]; then
         mv "/tmp/$preserve_subdir" "$dir/$preserve_subdir" || { echo "Failed to restore $dir/$preserve_subdir"; exit 1; }
     fi
-
-    cd ..
 }
 
 # Clean and clone the web repository, preserving the users subdirectory
