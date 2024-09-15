@@ -19,8 +19,8 @@ services:
 
   web:
     build:
-      context: ./web
-      dockerfile: Dockerfile.web
+      context: ./
+      dockerfile: ./Dockerfile
     container_name: loopai_web
     ports:
       - "5000:5000"
