@@ -3,6 +3,7 @@ services:
     image: postgres
     container_name: postgres
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: loopai
     ports:
@@ -24,10 +25,15 @@ services:
     container_name: loopai_web
     ports:
       - "5000:5000"
+    working_dir: /app
     volumes:
       - .:/app
     depends_on:
       - db
+    environment:
+      - FLASK_APP=web/web_interface.py  # Set to your Flask app entry point
+      - FLASK_ENV=development
+      - SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DATABASE_URI}
     logging:
       driver: "syslog"  # Using syslog driver
       options:
