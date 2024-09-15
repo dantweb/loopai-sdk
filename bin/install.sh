@@ -40,10 +40,9 @@ clean_and_clone_repo() {
     if [ -n "$preserve_subdir" ] && [ -d "/tmp/$preserve_subdir" ]; then
         mv "/tmp/$preserve_subdir" "$dir/$preserve_subdir" || { echo "Failed to restore $dir/$preserve_subdir"; exit 1; }
     fi
-}
 
-# Move up one directory if needed
-cd ..
+    cd ..
+}
 
 # Clean and clone the web repository, preserving the users subdirectory
 clean_and_clone_repo "./web" "git@github.com:dantweb/loopai-web.git" "users"
@@ -55,7 +54,7 @@ clean_and_clone_repo "./view" "git@github.com:dantweb/loopai-view.git"
 clean_and_clone_repo "./core" "git@github.com:dantweb/loopai-core.git"
 
 echo "Repositories cleaned, cloned, and ready for development."
-
+ls -la
 # Build and Start Docker services
 echo "Building and starting Docker services..."
 docker compose up -d --build || { echo "Failed to build and start Docker services"; exit 1; }
