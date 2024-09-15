@@ -2,4 +2,4 @@
 
 LOOP_NAME="./loops/default.yaml"
 
-python3 src/app.py --loop $LOOP_NAME
+python3 core/app.py --loop $LOOP_NAME
