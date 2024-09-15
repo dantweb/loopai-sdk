@@ -71,6 +71,9 @@ echo "Running Alembic migrations..."
 # Execute Alembic migration commands inside the appropriate Docker container (assumed to be 'web')
 docker compose exec web alembic -c /app/web/migrations/alembic.ini upgrade head || { echo "Failed to run Alembic migrations"; exit 1; }
 
+echo "Install Python Packages..."
+install_missing_py_pkg.sh
+
 echo "Installation and startup complete."
 
 cd ..
