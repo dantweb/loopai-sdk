@@ -24,12 +24,16 @@ restart:
 
 
 flask:
-	docker compose exec web flask --app web/web_interface run --port 5000
+	docker compose exec loopai_web flask --app web/web_interface run --port 5000
 
 # Target to run Flask database migration
 flash_db_migrate:
-	docker compose exec web . .venv/bin/activate && flask --app web/web_interface db migrate -m "ADD SOME COMMENT HERE"
+	docker compose exec loopai_web . .venv/bin/activate && flask --app web/web_interface db migrate -m "ADD SOME COMMENT HERE"
 
 # Target to run Flask database upgrade
 flash_db_upgrade:
-	docker compose exec web . .venv/bin/activate && flask --app web/web_interface db upgrade
+	docker compose exec loopai_web . .venv/bin/activate && flask --app web/web_interface db upgrade
+
+# Target to access the web container console for debugging as a non-root user
+bash:
+	docker compose exec --user appuser web /bin/bash

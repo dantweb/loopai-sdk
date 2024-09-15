@@ -64,8 +64,9 @@ echo "Creating .env files..."
 cp .env.dist .env
 cp view/vue/admin/.env.dist view/vue/admin/.env
 
-## Run the Flask application inside the web container
-#echo "Starting Flask application..."
-#docker compose exec web flask --app web/web_interface run --port 5000 || { echo "Failed to start Flask application"; exit 1; }
+# Run Alembic migrations
+echo "Running Alembic migrations..."
+# Execute Alembic migration commands inside the appropriate Docker container (assumed to be 'web')
+docker compose exec web alembic upgrade head || { echo "Failed to run Alembic migrations"; exit 1; }
 
 echo "Installation and startup complete."
