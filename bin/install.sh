@@ -51,15 +51,15 @@ clean_and_clone_repo "./view" "git@github.com:dantweb/loopai-view.git"
 # Clean and clone the core repository
 clean_and_clone_repo "./core" "git@github.com:dantweb/loopai-core.git"
 
-echo "Repositories cleaned, cloned, and ready for development."
-ls -la
-# Build and Start Docker services
-echo "Building and starting Docker services..."
-docker compose up -d --build || { echo "Failed to build and start Docker services"; exit 1; }
-
 echo "Creating .env files..."
 cp .env.dist .env
 cp view/vue/admin/.env.dist view/vue/admin/.env
+
+echo "Repositories cleaned, cloned, and ready for development."
+
+# Build and Start Docker services
+echo "Building and starting Docker services..."
+docker compose up -d --build || { echo "Failed to build and start Docker services"; exit 1; }
 
 echo "Installation and startup complete."
 
