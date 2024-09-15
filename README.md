@@ -4,20 +4,31 @@
 
 ````
 git clone git@github.com:dantweb/loopai-sdk.git && cd loopai-sdk
-./bin/install.sh
-
 ````
+```bash
+./bin/install.sh
+```
+
+## How to deploy
+
+```
+./bin/server_deploy.sh
+```
+
 ## Run
- in the root:
 
+```bash
   flask --app web/web_interface run
+```
 
 
- in the backend:
+ in the backend container:
 
+```bash
   cd web/view/vue/admin
   npm install
   npm run serve
+```
 
 ## Overview
 
