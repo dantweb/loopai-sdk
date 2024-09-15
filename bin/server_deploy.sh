@@ -3,14 +3,19 @@
 # Exit on any error
 set -e
 
+
 echo "Stopping running Docker containers..."
 docker compose down || { echo "Failed to stop Docker containers"; exit 1; }
 
 echo "Rebuilding and starting Docker containers..."
 docker compose up -d --build || { echo "Failed to build and start Docker containers"; exit 1; }
 
-# Run Alembic migrations to update the database schema
+
+create_db.sh
+
+# Run Alembic migrations
 echo "Running Alembic migrations..."
+# Execute Alembic migration commands inside the appropriate Docker container (assumed to be 'web')
 docker compose exec web alembic -c /app/web/migrations/alembic.ini upgrade head || { echo "Failed to run Alembic migrations"; exit 1; }
 
 # Install any missing Python packages
