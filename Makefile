@@ -22,17 +22,14 @@ logs:
 restart:
 	docker compose -f $(COMPOSE_FILE) down && docker-compose -f $(COMPOSE_FILE) up -d
 
-# Target to run the Flask web application
-web_legacy:
-	. .venv/bin/activate && FLASK_APP=./web/web_interface.py flask run
 
 flask:
-	flask --app web/web_interface run
+	docker compose exec web flask --app web/web_interface run --port 5000
 
 # Target to run Flask database migration
 flash_db_migrate:
-	. .venv/bin/activate && flask --app web/web_interface db migrate -m "ADD SOME COMMENT HERE"
+	docker compose exec web . .venv/bin/activate && flask --app web/web_interface db migrate -m "ADD SOME COMMENT HERE"
 
 # Target to run Flask database upgrade
 flash_db_upgrade:
-	. .venv/bin/activate && flask --app web/web_interface db upgrade
+	docker compose exec web . .venv/bin/activate && flask --app web/web_interface db upgrade

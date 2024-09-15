@@ -1,5 +1,10 @@
 # LoopAI Applications
 
+ How to install
+
+````git clone git@github.com:dantweb/loopai-sdk.git && cd loopai-sdk
+./bin/install.sh
+
 ## Run
  in the root:
 
