@@ -23,7 +23,7 @@ services:
       dockerfile: ./Dockerfile
     container_name: loopai_web
     ports:
-      - "5001:5000"
+      - "5000:5000"
     volumes:
       - .:/app
     depends_on:
@@ -41,7 +41,7 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: vue_admin
     ports:
-      - "8081:80"
+      - "8080:80"
 
 volumes:
   postgres_data:
