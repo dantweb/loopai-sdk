@@ -28,7 +28,7 @@ jobs:
           ./bin/install.sh
 
       - name: Sync updated files to the server
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
@@ -45,7 +45,7 @@ jobs:
               ./ /home/linuxuser/web/loopai/
 
       - name: Run server-side deployment script
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
