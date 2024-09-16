@@ -16,7 +16,7 @@ jobs:
       - name: Set up SSH for Git Operations
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.SSH_GIT_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
