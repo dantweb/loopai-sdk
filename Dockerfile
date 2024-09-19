@@ -1,37 +1,41 @@
-# Use the official Python image from the Docker Hub
+# Use the official Python image
 FROM python:3.10-slim
 
-# Set the working directory in the container
+# Create a new user 'appuser' and group 'appuser'
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Set the working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y postgresql-client
+# Install build dependencies and clean up
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    postgresql-client \
+    netcat-openbsd \
+ && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user and group
-RUN addgroup --system appuser && adduser --system --ingroup appuser appuser
-
-# Copy the requirements file into the container
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-
-# Install any dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the working directory contents into the container
+# Copy the application code
 COPY . .
 
-# Ensure that the log file exists and has the correct permissions
-RUN touch /app/app.log && chown appuser:appuser /app/app.log
-
-# Change ownership of the app directory to the appuser
+# Change ownership of the /app directory to 'appuser'
 RUN chown -R appuser:appuser /app
 
-# Expose the port that the app runs on
-EXPOSE 5000
-
-# Switch to the non-root user
+# Switch to 'appuser'
 USER appuser
 
-# Define environment variable for Flask
-ENV FLASK_APP=web.web_interface.py
+# Copy the entrypoint script and set permissions
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Run the Flask app
-CMD ["flask", "run", "--host=0.0.0.0"]
+# Expose the application's port
+EXPOSE 5000
+
+# Set the entrypoint to your script
+ENTRYPOINT ["/app/entrypoint.sh"]
