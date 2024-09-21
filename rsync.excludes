@@ -1,0 +1,11 @@
+var/filesystem
+.git
+.github
+.env
+users
+.ssh
+__pycache__
+.docker
+.local
+.npm
+.nvm
