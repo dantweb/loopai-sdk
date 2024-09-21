@@ -59,9 +59,12 @@ jobs:
               --exclude '.github' \
               --exclude '.env' \
               --exclude 'users' \
-              --exclude 'node_modules' \
               --exclude '.ssh' \
               --exclude '__pycache__' \
+              --exclude '.docker' \
+              --exclude '.local' \
+              --exclude '.npm' \
+              --exclude '.nvm' \
               ./ /home/linuxuser/web_server/loopai_temp/
             
             # Move the temporary directory to the actual target
