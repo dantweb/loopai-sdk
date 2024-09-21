@@ -80,7 +80,7 @@ jobs:
           script: |
             # Navigate to the deployment directory
             cd /home/linuxuser/web_server/loopai_app
-            
+            ls -la
             # Set executable permissions on the server deployment script
             chmod +x ./bin/server_deploy.sh
             
