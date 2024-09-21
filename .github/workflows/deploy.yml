@@ -24,24 +24,40 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Install dependencies and build Docker containers
-        run: |
-          # Run the install script to build and prepare containers locally
-          chmod +x ./bin/install.sh 
-          ./bin/install.sh
-
-      - name: Rsync Deploy
-        uses: burnett01/rsync-deployments@7.0.1
+      - name: Sync updated files to the server using SSH Action
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          switches: -avz --delete --exclude-from='./workspace/rsync.excludes'
-          path: ./workspace/
-          remote_path: /home/linuxuser/web_server/loopai_app/
-          remote_host: ${{ secrets.SERVER_IP }}
-          remote_user: linuxuser
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Ensure rsync is installed on the server
+            sudo apt-get update && sudo apt-get install -y rsync
+            
+            # Create a temporary directory on the server to receive the files
+            mkdir -p /home/linuxuser/web_server/loopai_temp
+            
+            # Exit if rsync is not installed
+            if ! command -v rsync &> /dev/null; then
+              echo "rsync could not be found, please install it."
+              exit 1
+            fi
+            
+            cd ..
+            
+            # Run rsync from the GitHub Actions runner to the server
+            rsync -avz --delete \
+              --exclude-from='workspace/rsync.excludes'
+              workspace/ /home/linuxuser/web_server/loopai_temp/
+            
+            # Move the temporary directory to the actual target
+            rsync -avz --delete /home/linuxuser/web_server/loopai_temp/ /home/linuxuser/web_server/loopai_app/
+            
+            # Remove the temporary directory
+            rm -rf /home/linuxuser/web_server/loopai_temp/
+            
+            echo "Contents of loopai_app after rsync:"
+            ls -la /home/linuxuser/web_server/loopai_app
 
       - name: Run server-side deployment script
         uses: appleboy/ssh-action@v1.0.3
