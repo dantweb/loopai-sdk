@@ -63,7 +63,7 @@ jobs:
               --exclude 'node_modules' \
               --exclude '.ssh' \
               --exclude '__pycache__' \
-              /workspace/ /home/linuxuser/web_server/loopai_temp/
+              workspace/ /home/linuxuser/web_server/loopai_temp/
             
             # Move the temporary directory to the actual target
             rsync -avz --delete /home/linuxuser/web_server/loopai_temp/ /home/linuxuser/web_server/loopai_app/
