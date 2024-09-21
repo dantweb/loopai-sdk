@@ -52,20 +52,13 @@ jobs:
               exit 1
             fi
             
+            mkdir workspace
+            mv -f . workspace
+            
             # Run rsync from the GitHub Actions runner to the server
             rsync -avz --delete \
-              --exclude 'var/filesystem' \
-              --exclude '.git' \
-              --exclude '.github' \
-              --exclude '.env' \
-              --exclude 'users' \
-              --exclude '.ssh' \
-              --exclude '__pycache__' \
-              --exclude '.docker' \
-              --exclude '.local' \
-              --exclude '.npm' \
-              --exclude '.nvm' \
-              ./ /home/linuxuser/web_server/loopai_temp/
+              --exclude-from='workspace/rsync.excludes'
+              workspace/ /home/linuxuser/web_server/loopai_temp/
             
             # Move the temporary directory to the actual target
             rsync -avz --delete /home/linuxuser/web_server/loopai_temp/ /home/linuxuser/web_server/loopai_app/
