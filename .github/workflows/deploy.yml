@@ -17,7 +17,7 @@ jobs:
       - name: Checkout the code into workspace
         uses: actions/checkout@v3
         with:
-          path: workspace
+          path: ./workspace
 
       - name: Set up SSH for Git Operations
         uses: webfactory/ssh-agent@v0.5.4
@@ -33,41 +33,15 @@ jobs:
           chmod +x ./bin/install.sh 
           ./bin/install.sh
 
-      - name: Sync updated files to the server using SSH Action
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Rsync Deploy
+        uses: burnett01/rsync-deployments@7.0.1
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Ensure rsync is installed on the server
-            sudo apt-get update && sudo apt-get install -y rsync
-            
-            # Create a temporary directory on the server to receive the files
-            mkdir -p /home/linuxuser/web_server/loopai_temp
-            
-            # Exit if rsync is not installed
-            if ! command -v rsync &> /dev/null; then
-              echo "rsync could not be found, please install it."
-              exit 1
-            fi
-            
-            mkdir workspace
-            mv -f * workspace
-            
-            # Run rsync from the GitHub Actions runner to the server
-            rsync -avz --delete \
-              --exclude-from='workspace/rsync.excludes'
-              workspace/ /home/linuxuser/web_server/loopai_temp/
-            
-            # Move the temporary directory to the actual target
-            rsync -avz --delete /home/linuxuser/web_server/loopai_temp/ /home/linuxuser/web_server/loopai_app/
-            
-            # Remove the temporary directory
-            rm -rf /home/linuxuser/web_server/loopai_temp/
-            
-            echo "Contents of loopai_app after rsync:"
-            ls -la /home/linuxuser/web_server/loopai_app
+          switches: -avz --delete --exclude-from='./workspace/rsync.excludes'
+          path: ./workspace/
+          remote_path: /home/linuxuser/web_server/loopai_app/
+          remote_host: ${{ secrets.SERVER_IP }}
+          remote_user: linuxuser
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Run server-side deployment script
         uses: appleboy/ssh-action@v1.0.3
