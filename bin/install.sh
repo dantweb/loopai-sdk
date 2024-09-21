@@ -4,7 +4,8 @@
 clean_and_clone_repo() {
     local dir=$1
     local repo_url=$2
-    local preserve_subdir=$3
+    local branch=$3
+    local preserve_subdir=$4
 
     # If the directory exists, clean it but preserve the specified subdirectory
     if [ -d "$dir" ]; then
@@ -24,9 +25,8 @@ clean_and_clone_repo() {
     fi
 
     # Clone the repository directly into the target directory
-    echo "Cloning $repo_url into $dir..."
-    rm -rf "$dir"/*  # Make sure the directory is clean before cloning
-    git clone "$repo_url" "$dir" || { echo "Failed to clone $repo_url"; exit 1; }
+    echo "Cloning $repo_url (branch: $branch) into $dir..."
+    git clone -b "$branch" "$repo_url" "$dir" || { echo "Failed to clone $repo_url on branch $branch"; exit 1; }
 
     # Check if the .git folder exists after cloning
     if [ -d "$dir/.git" ]; then
@@ -42,14 +42,38 @@ clean_and_clone_repo() {
     fi
 }
 
+# Variables for branch names
+WEB_BRANCH=""
+VIEW_BRANCH=""
+CORE_BRANCH=""
+SAME_BRANCH=""
+
+# Parsing input parameters for branch names or --all-same
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --web-branch) WEB_BRANCH="$2"; shift ;;
+        --view-branch) VIEW_BRANCH="$2"; shift ;;
+        --core-branch) CORE_BRANCH="$2"; shift ;;
+        --all-same) SAME_BRANCH="$2"; WEB_BRANCH="$2"; VIEW_BRANCH="$2"; CORE_BRANCH="$2"; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+# Default branch if no branch is provided
+DEFAULT_BRANCH="production"
+WEB_BRANCH="${WEB_BRANCH:-$DEFAULT_BRANCH}"
+VIEW_BRANCH="${VIEW_BRANCH:-$DEFAULT_BRANCH}"
+CORE_BRANCH="${CORE_BRANCH:-$DEFAULT_BRANCH}"
+
 # Clean and clone the web repository, preserving the users subdirectory
-clean_and_clone_repo "./web" "git@github.com:dantweb/loopai-web.git" "users"
+clean_and_clone_repo "./web" "git@github.com:dantweb/loopai-web.git" "$WEB_BRANCH" "users"
 
 # Clean and clone the view repository
-clean_and_clone_repo "./view" "git@github.com:dantweb/loopai-view.git"
+clean_and_clone_repo "./view" "git@github.com:dantweb/loopai-view.git" "$VIEW_BRANCH"
 
 # Clean and clone the core repository
-clean_and_clone_repo "./core" "git@github.com:dantweb/loopai-core.git"
+clean_and_clone_repo "./core" "git@github.com:dantweb/loopai-core.git" "$CORE_BRANCH"
 
 echo "Creating .env files..."
 cp .env.dist .env

@@ -5,9 +5,19 @@
 ````
 git clone git@github.com:dantweb/loopai-sdk.git && cd loopai-sdk
 ````
-```bash
-./bin/install.sh
+### Branch Parameters:
 ```
+--web-branch <branch>: Specify the branch for the web repository.
+--view-branch <branch>: Specify the branch for the view repository.
+--core-branch <branch>: Specify the branch for the core repository.
+--all-same <branch>: Use the same branch for all repositories.
+```
+
+### Example install
+```
+./bin/install.sh --web-branch feature/web --view-branch develop --core-branch release/core
+```
+
 
 ## How to deploy
 

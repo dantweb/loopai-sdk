@@ -1,6 +1,13 @@
 # Use the official Python image
 FROM python:3.10-slim
 
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Upgrade pip to the latest version as root
+RUN pip install --no-cache-dir --upgrade pip
+
 # Create a new user 'appuser' and group 'appuser'
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
@@ -32,7 +39,7 @@ USER appuser
 
 # Copy the entrypoint script and set permissions
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+
 
 # Expose the application's port
 EXPOSE 5000

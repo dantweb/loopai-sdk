@@ -5,11 +5,11 @@ COMPOSE_FILE=docker-compose.yml
 
 # Target to bring up the Docker Compose services
 up:
-	docker compose -f $(COMPOSE_FILE) up -d
+	docker compose -f $(COMPOSE_FILE) up --remove-orphans -d
 
 # Target to bring down the Docker Compose services
 down:
-	docker compose -f $(COMPOSE_FILE) down
+	docker compose -f $(COMPOSE_FILE) down  --remove-orphans
 
 # Optional target to show the status of Docker Compose services
 status:
@@ -37,3 +37,19 @@ flash_db_upgrade:
 # Target to access the web container console for debugging as a non-root user
 bash:
 	docker compose exec --user appuser web /bin/bash
+
+
+# Upgrade a Python package
+upgrade-package:
+	docker-compose run --entrypoint "" web pip install --upgrade $(PACKAGE)
+
+# Rebuild Docker images
+rebuild:
+	docker-compose build --no-cache web
+
+# Run tests
+run_web_tests:
+	docker compose run --entrypoint "" \
+	  -e OPENBLAS_VERBOSE=0 \
+	  web \
+	  python -W ignore::DeprecationWarning -m unittest discover -s web/tests -p "test*.py" -v
