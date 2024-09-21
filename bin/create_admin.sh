@@ -18,8 +18,9 @@ DB_HOST=${POSTGRESQL_DB_HOST:-db}
 DB_PORT=${POSTGRESQL_DB_PORT:-5432}
 DB_NAME=${POSTGRESQL_DB_NAME}
 
-# Encrypt the password using PostgreSQL's built-in `crypt` function
-ENCRYPTED_PASSWORD=$(echo -n 'loopai' | openssl passwd -6 -stdin)
+# Generate an MD5 hash of the password 'loopai'
+ENCRYPTED_PASSWORD=$(echo -n 'loopai' | openssl dgst -md5 | awk '{print $2}')
+
 
 # SQL query to check if the user exists and create the user if not
 SQL_QUERY="
@@ -28,7 +29,7 @@ DO
 BEGIN
    IF NOT EXISTS (SELECT 1 FROM \"user\" WHERE login = 'admin') THEN
       INSERT INTO \"user\" (name, login, password, role, active)
-      VALUES ('Admin User', 'admin', '$ENCRYPTED_PASSWORD', 'ADMIN', 1);
+      VALUES ('Admin User', 'admin', '$ENCRYPTED_PASSWORD', 'ADMIN', true);
    END IF;
 END
 \$do\$;
