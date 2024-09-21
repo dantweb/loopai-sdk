@@ -53,7 +53,7 @@ jobs:
             fi
             
             mkdir workspace
-            mv -f . workspace
+            mv -f * workspace
             
             # Run rsync from the GitHub Actions runner to the server
             rsync -avz --delete \
