@@ -18,6 +18,15 @@ git clone git@github.com:dantweb/loopai-sdk.git && cd loopai-sdk
 ./bin/install.sh --web-branch feature/web --view-branch develop --core-branch release/core
 ```
 
+### Migrations
+After installation run migrations:
+```
+make bash
+```
+inside the web container:
+```
+flask db upgrade -d web/migrations
+```
 
 ## How to deploy
 
