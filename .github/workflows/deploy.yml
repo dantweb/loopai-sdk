@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies and build Docker containers
         run: |
           # Run the install script to build and prepare containers locally
-          chmod +x ./bin/install.sh
+          chmod +x ./bin/install.sh 
           ./bin/install.sh
 
       - name: Sync updated files to the server
