@@ -9,14 +9,15 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    # Set the default working directory for all 'run' steps to './workspace'
     defaults:
       run:
-        working-directory: workspace
+        working-directory: ./workspace
 
     steps:
-      - name: Checkout the code
+      - name: Checkout the code into workspace
         uses: actions/checkout@v3
+        with:
+          path: workspace
 
       - name: Set up SSH for Git Operations
         uses: webfactory/ssh-agent@v0.5.4
