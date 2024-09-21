@@ -9,6 +9,11 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    # Set the default working directory for all 'run' steps to './workspace'
+    defaults:
+      run:
+        working-directory: ./workspace
+
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
@@ -27,22 +32,43 @@ jobs:
           chmod +x ./bin/install.sh 
           ./bin/install.sh
 
-      - name: Sync updated files to the server
+      - name: Sync updated files to the server using SSH Action
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Ensure correct paths and exclude unnecessary directories during sync
+            # Ensure rsync is installed on the server
+            sudo apt-get update && sudo apt-get install -y rsync
+            
+            # Create a temporary directory on the server to receive the files
+            mkdir -p /home/linuxuser/web_server/loopai_temp
+            
+            # Exit if rsync is not installed
+            if ! command -v rsync &> /dev/null; then
+              echo "rsync could not be found, please install it."
+              exit 1
+            fi
+            
+            # Run rsync from the GitHub Actions runner to the server
             rsync -avz --delete \
               --exclude 'var/filesystem' \
               --exclude '.git' \
               --exclude '.github' \
+              --exclude '.env' \
               --exclude 'web/users' \
               --exclude 'users' \
               --exclude 'node_modules' \
-              ./ /home/linuxuser/web/loopai/
+              --exclude '.ssh' \
+              --exclude '__pycache__' \
+              /workspace/ /home/linuxuser/web_server/loopai_temp/
+            
+            # Move the temporary directory to the actual target
+            rsync -avz --delete /home/linuxuser/web_server/loopai_temp/ /home/linuxuser/web_server/loopai_app/
+            
+            # Remove the temporary directory
+            rm -rf /home/linuxuser/web_server/loopai_temp/
 
       - name: Run server-side deployment script
         uses: appleboy/ssh-action@v1.0.3
@@ -52,7 +78,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Navigate to the deployment directory
-            cd /home/linuxuser/web/loopai
+            cd /home/linuxuser/web_server/loopai_app
             
             # Set executable permissions on the server deployment script
             chmod +x ./bin/server_deploy.sh
