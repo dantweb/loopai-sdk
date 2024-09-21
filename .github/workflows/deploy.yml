@@ -12,7 +12,7 @@ jobs:
     # Set the default working directory for all 'run' steps to './workspace'
     defaults:
       run:
-        working-directory: ./workspace
+        working-directory: workspace
 
     steps:
       - name: Checkout the code
