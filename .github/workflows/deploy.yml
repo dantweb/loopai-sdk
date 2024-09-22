@@ -32,6 +32,10 @@ jobs:
             --core-branch production \
             --force-http
 
+      - name: Copy bin directory into loopai_src
+        run: |
+          cp -R ./bin ./loopai_src/
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -69,7 +73,7 @@ jobs:
             ls -la
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
-            docker cp loopai_web:/app ./app/
+            
 
 
      
