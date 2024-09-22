@@ -48,10 +48,9 @@ jobs:
         run: |
           docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest \
             --build-arg VUE_APP_API_BASE_URL=http://192.248.186.201:5000/api \            
-            -f ./loopai_src/view/vue/admin/Dockerfile.frontend \
-            ./loopai_src/view/vue/admin
+            -f ./loopai_src/view/vue/admin/Dockerfile.frontend ./loopai_src/view/vue/admin
           
-          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest
+          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest 
 
   deploy:
     needs: build
