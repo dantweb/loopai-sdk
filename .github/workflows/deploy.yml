@@ -25,12 +25,12 @@ jobs:
 
       - name: Build and Push Backend Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/loopai_web:latest .
+          docker build -t ghcr.io/${{ github.repository_owner }}/loopai_web:latest ./app
           docker push ghcr.io/${{ github.repository_owner }}/loopai_web:latest
 
       - name: Build and Push Frontend Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest ./view/vue/admin
+          docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest ./app/view/vue/admin
           docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest
 
   deploy:

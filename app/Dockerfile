@@ -1,20 +1,13 @@
 # Use the official Python image
 FROM python:3.10-slim
 
-# Set environment variables
+WORKDIR /app
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Upgrade pip to the latest version as root
-RUN pip install --no-cache-dir --upgrade pip
-
-# Create a new user 'appuser' and group 'appuser'
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# Set the working directory
-WORKDIR /app
-
-# Install build dependencies and clean up
 RUN apt-get update && apt-get install -y \
     build-essential \
     libssl-dev \
@@ -29,7 +22,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
-COPY .. .
+COPY . /app
 
 # Change ownership of the /app directory to 'appuser'
 RUN chown -R appuser:appuser /app
@@ -37,12 +30,11 @@ RUN chown -R appuser:appuser /app
 # Switch to 'appuser'
 USER appuser
 
-# Copy the entrypoint script and set permissions
-COPY ../entrypoint.sh /app/entrypoint.sh
+# Set environment variables
+ENV PYTHONPATH=/app
 
-
-# Expose the application's port
+# Expose port
 EXPOSE 5000
 
-# Set the entrypoint to your script
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Start the application
+CMD ["./entrypoint.sh"]

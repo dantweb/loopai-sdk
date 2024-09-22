@@ -14,12 +14,17 @@ while ! nc -z $POSTGRESQL_DB_HOST $POSTGRESQL_DB_PORT; do
 done
 echo "Database is up and running!"
 
+# Set the PYTHONPATH explicitly
+export PYTHONPATH=/app
+
 # Export FLASK_APP if not already set
 export FLASK_APP=${FLASK_APP:-web}
 
 # Run database migrations
 #echo "Running database migrations..."
 #flask db upgrade --directory web/migrations
+# Check the PYTHONPATH
+echo "PYTHONPATH is set to: $PYTHONPATH"
 
 # Start the Flask application
 echo "Starting the Flask application..."
