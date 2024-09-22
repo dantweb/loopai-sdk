@@ -16,6 +16,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Set up Git credentials for HTTPS cloning
+        run: |
+          git config --global credential.helper store
+          echo "https://${{ github.actor }}:${{ secrets.DANTWEB_DEPLOY_TOKEN }}@github.com" > ~/.git-credentials
+
       - name: Install dependencies and build Docker containers
         run: |
           # Run the install script to build and prepare containers locally
