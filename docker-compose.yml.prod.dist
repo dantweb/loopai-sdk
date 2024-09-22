@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: loopai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8088:8080"
+    networks:
+      - app-network
+
+  web:
+    image: ghcr.io/dantweb/loopai_web:latest
+    container_name: loopai_web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=web
+      - FLASK_ENV=production
+      - POSTGRESQL_DB_HOST=db
+      - POSTGRESQL_DB_PORT=5432
+      - SQLALCHEMY_DATABASE_URI=postgresql://postgres:admin@db:5432/loopai
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - app-network
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://localhost:514"
+        tag: "loopai_web"
+
+  frontend:
+    image: ghcr.io/dantweb/vue_admin:latest
+    container_name: vue_admin
+    ports:
+      - "8080:80"
+    environment:
+      - VUE_APP_API_BASE_URL=http://localhost:5000/api
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,59 +6,37 @@ on:
       - production
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./workspace
-
     steps:
-      - name: Checkout the code into workspace
+      - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          path: ./workspace
 
-      - name: Set up SSH for Git Operations
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Sync updated files to the server using SSH Action
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Ensure rsync is installed on the server
-            sudo apt-get update && sudo apt-get install -y rsync
-            
-            # Create a temporary directory on the server to receive the files
-            mkdir -p /home/linuxuser/web_server/loopai_temp
-            
-            # Exit if rsync is not installed
-            if ! command -v rsync &> /dev/null; then
-              echo "rsync could not be found, please install it."
-              exit 1
-            fi
-            
-            cd ..
-            
-            # Run rsync from the GitHub Actions runner to the server
-            rsync -avz --delete \
-              --exclude-from='workspace/rsync.excludes'
-              workspace/ /home/linuxuser/web_server/loopai_temp/
-            
-            # Move the temporary directory to the actual target
-            rsync -avz --delete /home/linuxuser/web_server/loopai_temp/ /home/linuxuser/web_server/loopai_app/
-            
-            # Remove the temporary directory
-            rm -rf /home/linuxuser/web_server/loopai_temp/
-            
-            echo "Contents of loopai_app after rsync:"
-            ls -la /home/linuxuser/web_server/loopai_app
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build and Push Backend Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/loopai_web:latest ./path/to/backend
+          docker push ghcr.io/${{ github.repository_owner }}/loopai_web:latest
+
+      - name: Build and Push Frontend Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest ./view/vue/admin
+          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Run server-side deployment script
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -67,10 +45,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Navigate to the deployment directory
-            cd /home/linuxuser/web_server/loopai_app
+            cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             ls -la
-            # Set executable permissions on the server deployment script
-            chmod +x ./bin/server_deploy.sh
-            
-            # Run the server-side deployment script
-            ./bin/server_deploy.sh
+            docker-compose pull
+            docker-compose up -d
+     

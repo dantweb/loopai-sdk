@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: loopai
+      POSTGRESQL_DB_HOST: ${POSTGRESQL_DB_HOST}
+      POSTGRESQL_DB_PORT: ${POSTGRESQL_DB_PORT}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8088:8080"
+
+  web:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: loopai_web
+    ports:
+      - "5000:5000"
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    environment:
+      - FLASK_APP=web  # Set to your Flask app entry point
+      - FLASK_ENV=development
+      - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
+      - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
+
+    logging:
+      driver: "syslog"  # Using syslog driver
+      options:
+        syslog-address: "udp://localhost:514"  # Address of the syslog server
+        tag: "loopai_web"  # Optional tag for log identification
+
+
+  frontend:
+    build:
+      context: ./view/vue/admin
+      dockerfile: Dockerfile.frontend
+      args:
+        - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
+    container_name: vue_admin
+    ports:
+      - "8080:80"
+    environment:
+      - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
+
+volumes:
+  postgres_data:
+    driver: local
