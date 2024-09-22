@@ -67,5 +67,6 @@ jobs:
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             ls -la
             docker compose pull
-            docker compose up -d
+            docker compose up -d --remove-orphans --force-recreate
+
      
