@@ -67,17 +67,17 @@ VIEW_BRANCH="${VIEW_BRANCH:-$DEFAULT_BRANCH}"
 CORE_BRANCH="${CORE_BRANCH:-$DEFAULT_BRANCH}"
 
 # Clean and clone the web repository, preserving the users subdirectory
-clean_and_clone_repo "./app/web" "git@github.com:dantweb/loopai-web.git" "$WEB_BRANCH" "users"
+clean_and_clone_repo "./loopai_src/web" "git@github.com:dantweb/loopai-web.git" "$WEB_BRANCH" "users"
 
 # Clean and clone the view repository
-clean_and_clone_repo "./app/view" "git@github.com:dantweb/loopai-view.git" "$VIEW_BRANCH"
+clean_and_clone_repo "./loopai_src/view" "git@github.com:dantweb/loopai-view.git" "$VIEW_BRANCH"
 
 # Clean and clone the core repository
-clean_and_clone_repo "./app/core" "git@github.com:dantweb/loopai-core.git" "$CORE_BRANCH"
+clean_and_clone_repo "./loopai_src/core" "git@github.com:dantweb/loopai-core.git" "$CORE_BRANCH"
 
 echo "Creating .env files..."
 cp .env.dist .env
-cp app/view/vue/admin/.env.dist app/view/vue/admin/.env
+cp loopai_src/view/vue/admin/.env.dist loopai_src/view/vue/admin/.env
 
 echo "Repositories cleaned, cloned, and ready for development."
 
