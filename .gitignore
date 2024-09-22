@@ -7,4 +7,4 @@
 /core/*
 /view/*
 /web/*
-/tests/_data/output/*
+/app/core/tests/_data/output/*

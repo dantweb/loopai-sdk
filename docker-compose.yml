@@ -22,8 +22,8 @@ services:
 
   web:
     build:
-      context: ./
-      dockerfile: ./Dockerfile
+      context: ./app
+      dockerfile: app/Dockerfile
     container_name: loopai_web
     ports:
       - "5000:5000"
@@ -48,7 +48,7 @@ services:
 
   frontend:
     build:
-      context: ./view/vue/admin
+      context: app/view/vue/admin
       dockerfile: Dockerfile.frontend
       args:
         - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}

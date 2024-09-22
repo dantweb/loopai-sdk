@@ -29,7 +29,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
-COPY . .
+COPY .. .
 
 # Change ownership of the /app directory to 'appuser'
 RUN chown -R appuser:appuser /app
@@ -38,7 +38,7 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Copy the entrypoint script and set permissions
-COPY entrypoint.sh /app/entrypoint.sh
+COPY ../entrypoint.sh /app/entrypoint.sh
 
 
 # Expose the application's port
