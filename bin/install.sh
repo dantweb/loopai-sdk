@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Default to using SSH for cloning
+USE_HTTP=false
+
 # Function to clean a directory and clone the Git repository, preserving specific subdirectories if needed
 clean_and_clone_repo() {
     local dir=$1
@@ -42,19 +45,30 @@ clean_and_clone_repo() {
     fi
 }
 
+# Convert repo URL based on whether to use HTTP or SSH
+get_repo_url() {
+    local repo=$1
+    if [ "$USE_HTTP" = true ]; then
+        echo "https://github.com/${repo}.git"
+    else
+        echo "git@github.com:${repo}.git"
+    fi
+}
+
 # Variables for branch names
 WEB_BRANCH=""
 VIEW_BRANCH=""
 CORE_BRANCH=""
 SAME_BRANCH=""
 
-# Parsing input parameters for branch names or --all-same
+# Parsing input parameters for branch names or --all-same, and handling the --force-http flag
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --web-branch) WEB_BRANCH="$2"; shift ;;
         --view-branch) VIEW_BRANCH="$2"; shift ;;
         --core-branch) CORE_BRANCH="$2"; shift ;;
         --all-same) SAME_BRANCH="$2"; WEB_BRANCH="$2"; VIEW_BRANCH="$2"; CORE_BRANCH="$2"; shift ;;
+        --force-http) USE_HTTP=true ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -66,14 +80,19 @@ WEB_BRANCH="${WEB_BRANCH:-$DEFAULT_BRANCH}"
 VIEW_BRANCH="${VIEW_BRANCH:-$DEFAULT_BRANCH}"
 CORE_BRANCH="${CORE_BRANCH:-$DEFAULT_BRANCH}"
 
+# Get the correct repo URLs (HTTP or SSH based on the flag)
+WEB_REPO=$(get_repo_url "dantweb/loopai-web")
+VIEW_REPO=$(get_repo_url "dantweb/loopai-view")
+CORE_REPO=$(get_repo_url "dantweb/loopai-core")
+
 # Clean and clone the web repository, preserving the users subdirectory
-clean_and_clone_repo "./loopai_src/web" "git@github.com:dantweb/loopai-web.git" "$WEB_BRANCH" "users"
+clean_and_clone_repo "./loopai_src/web" "$WEB_REPO" "$WEB_BRANCH" "users"
 
 # Clean and clone the view repository
-clean_and_clone_repo "./loopai_src/view" "git@github.com:dantweb/loopai-view.git" "$VIEW_BRANCH"
+clean_and_clone_repo "./loopai_src/view" "$VIEW_REPO" "$VIEW_BRANCH"
 
 # Clean and clone the core repository
-clean_and_clone_repo "./loopai_src/core" "git@github.com:dantweb/loopai-core.git" "$CORE_BRANCH"
+clean_and_clone_repo "./loopai_src/core" "$CORE_REPO" "$CORE_BRANCH"
 
 echo "Creating .env files..."
 cp .env.dist .env
