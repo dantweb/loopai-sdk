@@ -77,6 +77,7 @@ clean_and_clone_repo "./loopai_src/core" "git@github.com:dantweb/loopai-core.git
 
 echo "Creating .env files..."
 cp .env.dist .env
+cp loopai_src/.env.dist loopai_src/.env
 cp loopai_src/view/vue/admin/.env.dist loopai_src/view/vue/admin/.env
 
 echo "Repositories cleaned, cloned, and ready for development."
