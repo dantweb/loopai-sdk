@@ -30,7 +30,10 @@ jobs:
 
       - name: Build and Push Frontend Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest ./loopai_src/view/vue/admin
+          docker build -t ghcr.io/dantweb/vue_admin:latest \
+            -f ./loopai_src/view/vue/admin/Dockerfile.frontend \
+            ./loopai_src/view/vue/admin
+          
           docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest
 
   deploy:
@@ -47,6 +50,6 @@ jobs:
             # Navigate to the deployment directory
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             ls -la
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
+            docker compose up -d
      

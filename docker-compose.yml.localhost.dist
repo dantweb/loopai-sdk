@@ -3,9 +3,9 @@ services:
     image: postgres
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: loopai
+      POSTGRES_USER: ${POSTGRESQL_DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRESQL_DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRESQL_DB_NAME}
       POSTGRESQL_DB_HOST: ${POSTGRESQL_DB_HOST}
       POSTGRESQL_DB_PORT: ${POSTGRESQL_DB_PORT}
     ports:
