@@ -3,9 +3,9 @@ services:
     image: postgres
     container_name: postgres
     environment:
-      POSTGRES_USER: ${POSTGRESQL_DB_USER}
-      POSTGRES_PASSWORD: ${POSTGRESQL_DB_PASSWORD}
-      POSTGRES_DB: ${POSTGRESQL_DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: loopai
       POSTGRESQL_DB_HOST: ${POSTGRESQL_DB_HOST}
       POSTGRESQL_DB_PORT: ${POSTGRESQL_DB_PORT}
     ports:
@@ -22,18 +22,19 @@ services:
 
   web:
     build:
-      context: ./
-      dockerfile: ./Dockerfile
+      context: ./loopai_src
+      dockerfile: Dockerfile
     container_name: loopai_web
     ports:
       - "5000:5000"
     working_dir: /app
     volumes:
-      - .:/app
+      - ./loopai_src:/app
     depends_on:
       - db
     environment:
-      - FLASK_APP=web  # Set to your Flask app entry point
+      - PYTHONPATH=/app
+      - FLASK_APP=app.web  # Set to your Flask app entry point
       - FLASK_ENV=development
       - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
@@ -48,7 +49,7 @@ services:
 
   frontend:
     build:
-      context: ./view/vue/admin
+      context: ./loopai_src/view/vue/admin
       dockerfile: Dockerfile.frontend
       args:
         - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
@@ -56,7 +57,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
+      - VUE_APP_API_BASE_URL
 
 volumes:
   postgres_data:
