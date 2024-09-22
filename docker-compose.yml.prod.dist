@@ -43,6 +43,8 @@ services:
       options:
         syslog-address: "udp://localhost:514"
         tag: "loopai_web"
+    volumes:
+      - ./app:/app
 
   frontend:
     image: ghcr.io/dantweb/vue_admin:latest
@@ -50,7 +52,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      - VUE_APP_API_BASE_URL=http://localhost:5000/api
+      - VUE_APP_API_BASE_URL
     restart: unless-stopped
     networks:
       - app-network
