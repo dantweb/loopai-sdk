@@ -47,6 +47,7 @@ jobs:
       - name: Build and Push Frontend Docker Image
         run: |
           docker build -t ghcr.io/dantweb/vue_admin:latest \
+            --build-arg VUE_APP_API_BASE_URL=http://192.248.186.201/:5000/api \            
             -f ./loopai_src/view/vue/admin/Dockerfile.frontend \
             ./loopai_src/view/vue/admin
           

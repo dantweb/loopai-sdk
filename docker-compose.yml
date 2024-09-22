@@ -57,7 +57,7 @@ services:
     ports:
       - "8080:80"
     environment:
-      - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
+      - VUE_APP_API_BASE_URL
 
 volumes:
   postgres_data:
