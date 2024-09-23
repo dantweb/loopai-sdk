@@ -86,6 +86,76 @@ jobs:
             # Remove the temporary container
             docker rm temp_loopai_web
 
+  live-prod-checkup:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install curl
+        run: sudo apt-get update && sudo apt-get install -y curl
+
+      - name: Verify All Docker Containers Are Running
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            #!/bin/bash
+
+            set -e  # Exit immediately if a command exits with a non-zero status
+
+            echo "Checking status of all Docker containers..."
+
+            # Navigate to the deployment directory
+            cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
+
+            # Get the number of running containers
+            RUNNING_CONTAINERS=$(docker compose ps --filter "status=running" | grep "Up" | wc -l)
+
+            # Get the total number of services
+            TOTAL_SERVICES=$(docker compose config --services | wc -l)
+
+            echo "Running containers: $RUNNING_CONTAINERS"
+            echo "Total services: $TOTAL_SERVICES"
+
+            if [ "$RUNNING_CONTAINERS" -ne "$TOTAL_SERVICES" ]; then
+              echo "Error: Not all Docker containers are running."
+              docker compose ps
+              exit 1
+            else
+              echo "All Docker containers are running successfully."
+            fi
+
+      - name: Verify Frontend Accessibility and Login Form Visibility
+        run: |
+          echo "Checking frontend accessibility at http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/..."
+          FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/)
+          if [ "$FRONTEND_RESPONSE" -ne 200 ]; then
+            echo "Error: Frontend is not accessible. HTTP Status Code: $FRONTEND_RESPONSE"
+            exit 1
+          else
+            echo "Frontend is accessible."
+          fi
+
+          echo "Verifying that the login form is visible on the frontend..."
+          LOGIN_FORM_PRESENT=$(curl -s http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/ | grep -i "login form" || true)
+          if [ -z "$LOGIN_FORM_PRESENT" ]; then
+            echo "Error: Login form not found on the frontend."
+            exit 1
+          else
+            echo "Login form is visible on the frontend."
+          fi
+
+      - name: Verify Backend Accessibility
+        run: |
+          echo "Checking backend accessibility at http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_FLASK_PORT }}/health..."
+          BACKEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_FLASK_PORT }}/health)
+          if [ "$BACKEND_RESPONSE" -ne 200 ]; then
+            echo "Error: Backend is not accessible. HTTP Status Code: $BACKEND_RESPONSE"
+            exit 1
+          else
+            echo "Backend is responding successfully."
+          fi
             
 
 
