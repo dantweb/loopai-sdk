@@ -74,6 +74,19 @@ jobs:
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
             
+            # Ensure the bin directory exists on the server
+            mkdir -p ./bin
+
+            # Create a temporary container from the latest loopai_web image
+            docker create --name temp_loopai_web ghcr.io/${{ github.repository_owner }}/loopai_web:latest
+
+            # Copy the bin directory from the temporary container to the server's bin directory
+            docker cp temp_loopai_web:/app/bin/. ./bin/ || { echo "Failed to copy bin scripts"; exit 1; }
+
+            # Remove the temporary container
+            docker rm temp_loopai_web
+
+            
 
 
      
