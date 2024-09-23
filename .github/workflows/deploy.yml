@@ -138,7 +138,7 @@ jobs:
           fi
 
           echo "Verifying that the login form is visible on the frontend..."
-          LOGIN_FORM_PRESENT=$(curl -s http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/ | grep -i "login form" || true)
+          LOGIN_FORM_PRESENT=$(curl -s http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/ | grep -i "Welcome to the" || true)
           if [ -z "$LOGIN_FORM_PRESENT" ]; then
             echo "Error: Login form not found on the frontend."
             exit 1
