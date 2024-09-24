@@ -34,17 +34,16 @@ services:
       - db
     environment:
       - PYTHONPATH=/app
-      - FLASK_APP=app.web  # Set to your Flask app entry point
+      - FLASK_APP=app.web
       - FLASK_ENV=development
       - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
-
     logging:
-      driver: "syslog"  # Using syslog driver
+      driver: "syslog"
       options:
-        syslog-address: "udp://localhost:514"  # Address of the syslog server
-        tag: "loopai_web"  # Optional tag for log identification
+        syslog-address: "udp://localhost:514"
+        tag: "loopai_web" # Optional tag for log identification
 
 
   frontend:
