@@ -24,6 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code
 COPY . /app
 
+RUN mkdir -p /app/var
 # Change ownership of the /app directory to 'appuser'
 RUN chown -R appuser:appuser /app
 
