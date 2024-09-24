@@ -1,11 +1,10 @@
+linuxuser@vultr:~/web_server/loopai_app$ cat docker-compose.yml 
 services:
   db:
     image: postgres:13
     container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: loopai
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
@@ -25,6 +24,8 @@ services:
   web:
     image: ghcr.io/dantweb/loopai_web:latest
     container_name: loopai_web
+    env_file:
+      - .env.web 
     ports:
       - "5000:5000"
     environment:
@@ -44,13 +45,15 @@ services:
         syslog-address: "udp://localhost:514"
         tag: "loopai_web"
     volumes:
-      - ./app:/app
+      - ./var/webusers:/loopai/webusers
 
   frontend:
     image: ghcr.io/dantweb/vue_admin:latest
     container_name: vue_admin
     ports:
       - "8080:80"
+    env_file:
+      - .env.frontend
     environment:
       - VUE_APP_API_BASE_URL
     restart: unless-stopped

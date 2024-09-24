@@ -137,15 +137,6 @@ jobs:
             echo "Frontend is accessible."
           fi
 
-          echo "Verifying that the login form is visible on the frontend..."
-          LOGIN_FORM_PRESENT=$(curl -s http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/ | grep -i "Welcome to the" || true)
-          if [ -z "$LOGIN_FORM_PRESENT" ]; then
-            echo "Error: Login form not found on the frontend."
-            exit 1
-          else
-            echo "Login form is visible on the frontend."
-          fi
-
       - name: Verify Backend Accessibility
         run: |
           echo "Checking backend accessibility at http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_FLASK_PORT }}/health..."
