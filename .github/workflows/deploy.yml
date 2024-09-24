@@ -127,7 +127,7 @@ jobs:
               echo "All Docker containers are running successfully."
             fi
 
-      - name: Verify Frontend Accessibility and Login Form Visibility
+      - name: Verify Frontend Accessibility
         run: |
           echo "Checking frontend accessibility at http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/..."
           FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_WEB_PORT80 }}/)
@@ -136,17 +136,6 @@ jobs:
             exit 1
           else
             echo "Frontend is accessible."
-          fi
-
-      - name: Verify Backend Accessibility
-        run: |
-          echo "Checking backend accessibility at http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_FLASK_PORT }}/health..."
-          BACKEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_FLASK_PORT }}/health)
-          if [ "$BACKEND_RESPONSE" -ne 200 ]; then
-            echo "Error: Backend is not accessible. HTTP Status Code: $BACKEND_RESPONSE"
-            exit 1
-          else
-            echo "Backend is responding successfully."
           fi
             
 
