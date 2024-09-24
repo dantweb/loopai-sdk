@@ -26,6 +26,7 @@ export FLASK_APP=${FLASK_APP:-web}
 # Check the PYTHONPATH
 echo "PYTHONPATH is set to: $PYTHONPATH"
 
+mkdir -p /app/var
 chown -R 1000:1000 /app/var
 
 # Start the Flask application
