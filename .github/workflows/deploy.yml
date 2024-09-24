@@ -51,7 +51,8 @@ jobs:
       - name: Build and Push Frontend Docker Image
         run: |
           docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest \
-            --build-arg VUE_APP_API_BASE_URL=http://192.248.186.201:5000/api \
+            --build-arg VUE_APP_API_BASE_URL=${{ secrets.LOOPAI_PROD_1_API_BASE_URL }} \
+            --build-arg VUE_APP_API_BASE_HOST=${{ secrets.LOOPAI_PROD_1_API_BASE_HOST }} \
             -f ./loopai_src/view/vue/admin/Dockerfile.frontend \
             ./loopai_src/view/vue/admin
           
