@@ -26,7 +26,6 @@ COPY . /app
 
 # Change ownership of the /app directory to 'appuser'
 RUN chown -R appuser:appuser /app
-RUN chown -R appuser:appuser /app/var
 
 # Switch to 'appuser'
 USER appuser
