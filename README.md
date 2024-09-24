@@ -13,6 +13,9 @@ git clone git@github.com:dantweb/loopai-sdk.git && cd loopai-sdk
 --all-same <branch>: Use the same branch for all repositories.
 ```
 
+### hints
+to run wp use post url string
+
 ### Example install
 ```
 ./bin/install.sh --web-branch feature/web --view-branch develop --core-branch release/core
