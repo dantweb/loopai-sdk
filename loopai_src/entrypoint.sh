@@ -26,8 +26,7 @@ export FLASK_APP=${FLASK_APP:-web}
 # Check the PYTHONPATH
 echo "PYTHONPATH is set to: $PYTHONPATH"
 
-# Set ownership of /app/var/webusers
-chown -R appuser:appuser /app/var/webusers
+chown -R appuser:appuser /app/var
 
 # Start the Flask application
 echo "Starting the Flask application..."

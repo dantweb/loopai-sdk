@@ -6,7 +6,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN groupadd -r -g 1000 appuser && useradd -r -u 1000 -g appuser appuser
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -26,6 +26,7 @@ COPY . /app
 
 # Change ownership of the /app directory to 'appuser'
 RUN chown -R appuser:appuser /app
+RUN chown -R appuser:appuser /app/var
 
 # Switch to 'appuser'
 USER appuser
