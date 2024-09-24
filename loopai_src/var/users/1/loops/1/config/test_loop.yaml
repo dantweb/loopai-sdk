@@ -1,6 +1,6 @@
 session:
   name: test_broadcast_session
-  code_source: 'loop_food.py'
+  code_source: 'test_loop.py'
   environment:
   loop:
     step1:
@@ -8,7 +8,7 @@ session:
       type: foreach
       input:
         - csv:
-            name: /input.csv
+            name: /test_loop_input.csv
       output:
         - broadcast: true
       action:
