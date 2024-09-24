@@ -45,7 +45,7 @@ services:
         syslog-address: "udp://localhost:514"
         tag: "loopai_web"
     volumes:
-      - ./var/webusers:/loopai/webusers
+      - ./var:/app/var
 
   frontend:
     image: ghcr.io/dantweb/vue_admin:latest

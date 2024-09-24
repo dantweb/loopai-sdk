@@ -31,6 +31,9 @@ RUN chown -R appuser:appuser /app
 # Switch to 'appuser'
 USER appuser
 
+# Set the working directory
+WORKDIR /app
+
 # Set environment variables
 ENV PYTHONPATH=/app
 

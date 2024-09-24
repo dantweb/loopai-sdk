@@ -27,8 +27,8 @@ export FLASK_APP=${FLASK_APP:-web}
 echo "PYTHONPATH is set to: $PYTHONPATH"
 
 mkdir -p /app/var
-chown -R 1000:1000 /app/var
+chown -R appuser:appuser /app/var
 
 # Start the Flask application
 echo "Starting the Flask application..."
-exec python -m web
+su -c "exec python -m web" appuser

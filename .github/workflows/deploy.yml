@@ -122,6 +122,8 @@ jobs:
             if [ "$RUNNING_CONTAINERS" -ne "$TOTAL_SERVICES" ]; then
               echo "Error: Not all Docker containers are running."
               docker compose ps
+              echo "Try to restart all Docker containers..."
+              docker compose up -d
               exit 1
             else
               echo "All Docker containers are running successfully."
