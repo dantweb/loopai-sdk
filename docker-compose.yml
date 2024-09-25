@@ -45,18 +45,19 @@ services:
         syslog-address: "udp://localhost:514"
         tag: "loopai_web" # Optional tag for log identification
 
-
   frontend:
     build:
       context: ./loopai_src/view/vue/admin
-      dockerfile: Dockerfile.frontend
+      dockerfile: Dockerfile.frontend.dev
       args:
         - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
+        - VUE_APP_API_BASE_HOST=${VUE_APP_API_BASE_HOST}
     container_name: vue_admin
     ports:
       - "8080:80"
     environment:
       - VUE_APP_API_BASE_URL
+      - VUE_APP_API_BASE_HOST
 
 volumes:
   postgres_data:
