@@ -3,15 +3,17 @@ services:
     image: postgres
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: loopai
+      POSTGRES_USER: ${POSTGRESQL_DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRESQL_DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRESQL_DB_NAME}
       POSTGRESQL_DB_HOST: ${POSTGRESQL_DB_HOST}
       POSTGRESQL_DB_PORT: ${POSTGRESQL_DB_PORT}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - debug_network
 
   adminer:
     image: adminer
@@ -27,6 +29,7 @@ services:
     container_name: loopai_web
     ports:
       - "5000:5000"
+      - "5678:5678"
     working_dir: /app
     volumes:
       - ./loopai_src:/app
@@ -36,6 +39,7 @@ services:
       - PYTHONPATH=/app
       - FLASK_APP=app.web
       - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
       - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
@@ -44,6 +48,8 @@ services:
       options:
         syslog-address: "udp://localhost:514"
         tag: "loopai_web" # Optional tag for log identification
+    networks:
+      - debug_network
 
   frontend:
     build:
@@ -58,7 +64,14 @@ services:
     environment:
       - VUE_APP_API_BASE_URL
       - VUE_APP_API_BASE_HOST
+    networks:
+      - debug_network
+
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  debug_network:
+    driver: bridge

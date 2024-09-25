@@ -31,6 +31,9 @@ jobs:
             --view-branch production \
             --core-branch production \
             --force-http
+          
+          sed -i "s/POSTGRESQL_DB_USER=.*/POSTGRESQL_DB_USER=${{ secrets.POSTGRES_DB_USER}/" .env
+          sed -i "s/POSTGRESQL_DB_PASSWORD=.*/POSTGRESQL_DB_PASSWORD=${POSTGRES_DB_PASSWORD}/" .env
 
       - name: Copy bin directory into loopai_src
         run: |
