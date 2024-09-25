@@ -48,7 +48,7 @@ services:
   frontend:
     build:
       context: ./loopai_src/view/vue/admin
-      dockerfile: Dockerfile.frontend.dev
+      dockerfile: Dockerfile.frontend
       args:
         - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
         - VUE_APP_API_BASE_HOST=${VUE_APP_API_BASE_HOST}
