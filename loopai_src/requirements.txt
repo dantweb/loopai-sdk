@@ -114,4 +114,5 @@ yarg==0.1.9
 eventlet==0.37.0
 gevent==24.2.1
 Flask-Testing==0.8.1
+pydevd-pycharm~=242.21829.153
 
