@@ -90,6 +90,8 @@ jobs:
 
             # Remove the temporary container
             docker rm temp_loopai_web
+            
+            sudo chown -R 1000:1000 var/ #making users' content writable
 
   live-prod-checkup:
     needs: deploy
