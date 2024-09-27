@@ -28,9 +28,9 @@ jobs:
           chmod +x ./bin/install.sh 
 
           ./bin/install.sh \
-            --web-branch production \
-            --view-branch production \
-            --core-branch production \
+            --web-branch feature/logger \
+            --view-branch feature/logger \
+            --core-branch feature/logger \
             --force-http
           
           sed -i "s/POSTGRESQL_DB_USER=.*/POSTGRESQL_DB_USER=${{ secrets.POSTGRES_DB_USER }}/" .env
