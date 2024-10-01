@@ -4,3 +4,5 @@
     - everything
 ### Changed
     - debugging
+### Fixed
+    - file upload
