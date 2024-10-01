@@ -8,4 +8,5 @@
     - file upload
     - max tokens count
     - newapi debug 2
+    - newapi debug 3
 ### Removed
