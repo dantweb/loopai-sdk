@@ -7,4 +7,5 @@
 ### Fixed
     - file upload
     - max tokens count
+    - newapi debug
 ### Removed
