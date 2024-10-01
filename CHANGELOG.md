@@ -6,3 +6,4 @@
     - debugging
 ### Fixed
     - file upload
+    - max tokens count
