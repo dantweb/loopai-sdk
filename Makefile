@@ -5,7 +5,7 @@ COMPOSE_FILE=docker-compose.yml
 
 # Target to bring up the Docker Compose services
 up:
-	docker compose -f $(COMPOSE_FILE) up --remove-orphans -d
+	docker compose --profile conditional -f $(COMPOSE_FILE) up --remove-orphans -d
 
 # Target to bring down the Docker Compose services
 down:
