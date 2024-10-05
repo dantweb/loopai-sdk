@@ -1,0 +1,81 @@
+services:
+  db:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRESQL_DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRESQL_DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRESQL_DB_NAME}
+      POSTGRESQL_DB_HOST: ${POSTGRESQL_DB_HOST}
+      POSTGRESQL_DB_PORT: ${POSTGRESQL_DB_PORT}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - debug_network
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8088:8080"
+
+  web:
+    build:
+      context: ./loopai_src
+      dockerfile: Dockerfile
+    container_name: loopai_web
+    ports:
+      - "5000:5000"
+      - "5678:5678"
+    working_dir: /app
+    volumes:
+      - ./loopai_src:/app
+    depends_on:
+      - db
+    environment:
+      - PYTHONPATH=/app
+      - FLASK_APP=app.web
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
+      - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
+      - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
+      - WEB_IN_DOCKER=true
+    entrypoint: >
+      sh -c 'if [ "$WEB_IN_DOCKER" = "true" ]; then exec flask run --host=0.0.0.0 --port=5000; else echo "Service disabled"; fi'
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://localhost:514"
+        tag: "loopai_web" # Optional tag for log identification
+    networks:
+      - debug_network
+
+  frontend:
+    build:
+      context: ./loopai_src/view/vue/admin
+      dockerfile: Dockerfile.frontend
+      args:
+        - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
+        - VUE_APP_API_BASE_HOST=${VUE_APP_API_BASE_HOST}
+    container_name: vue_admin
+    ports:
+      - "8080:80"
+    environment:
+      - VUE_APP_API_BASE_URL
+      - VUE_APP_API_BASE_HOST
+    networks:
+      - debug_network
+
+
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  debug_network:
+    driver: bridge
