@@ -65,3 +65,7 @@ SYSTEM_CONTENT_TEMPLATES = {
                    "at a famous blog about health and beauty and psychologie"
     }
 }
+
+
+CREATE_TASK_CSV_FIELDNAMES=['title']
+CREATE_TASK_CSV_MAPPING={'title':'headerTitle'}

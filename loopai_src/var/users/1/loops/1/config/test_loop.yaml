@@ -9,6 +9,8 @@ session:
       input:
         - csv:
             name: /test_loop_input.csv
+            fields: CREATE_TASK_CSV_FIELDNAMES
+            mapping: CREATE_TASK_CSV_MAPPING
       output:
         - broadcast: true
       action:
