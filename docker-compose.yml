@@ -26,7 +26,6 @@ services:
     build:
       context: ./loopai_src
       dockerfile: Dockerfile
-    profiles: ["conditional"]
     container_name: loopai_web
     ports:
       - "5000:5000"
@@ -44,9 +43,7 @@ services:
       - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
-      - WEB_IN_DOCKER=${WEB_IN_DOCKER}
-    entrypoint: >
-      sh -c 'if [ "$WEB_IN_DOCKER" = "true" ]; then exec flask run --host=0.0.0.0 --port=5000; else echo "Service disabled"; fi'
+      - WEB_IN_DOCKER=true
     logging:
       driver: "syslog"
       options:
