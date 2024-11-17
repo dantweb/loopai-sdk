@@ -1,0 +1,93 @@
+session:
+  name: technews_red_robot
+  description: "We read here news from the world and generate tasks for an editorial loop"
+  code_source: 'technews_test1.py'
+  environment:
+  config:
+  loop:
+    get_news:
+      description: "Get fresh news"
+      type: technews
+      input:
+        - text:
+            name: /dummy.csv
+      output:
+        - text:
+            name: /_data/news-headers.csv
+      action:
+        executor: technews
+        model: ''
+        prompt: TECH_NEWS_SOURCES_1
+        system_content: TECH_NEWS_SOURCES_S
+        max_tokens: 3
+
+    create_tasks:
+      description: "Create editorial tasks"
+      type: llm_executor
+      input:
+        - text:
+            name: /_data/news-headers.csv
+      output:
+        - csv:
+            name: /_data/tasks-csv.csv
+            fields: CREATE_TASK_CSV_FIELDNAMES
+            mapping: CREATE_TASK_CSV_MAPPING
+      action:
+        executor: llm
+        model: meta-llama/Meta-Llama-3.1-8B-Instruct
+        prompt: PROMPT_STEP_TASKS_JSON
+        system_content: SYSTEM_CONTENT_STEP_TASKS
+        max_tokens: 3000
+
+    foreach_step:
+      description: "Testing foreach"
+      type: foreach
+      input:
+        - csv:
+            name: /_data/tasks-csv.csv
+            fields: CREATE_TASK_CSV_FIELDNAMES
+            mapping: CREATE_TASK_CSV_MAPPING
+      output:
+        - broadcast: true
+      action:
+        executor: foreach
+        model: ''
+        prompt: ''
+        system_content: ''
+        max_tokens: 0
+        loop:
+          loop_step1:
+            description: "Process Input with OpenAI API"
+            type: llm_executor
+            input:
+              - broadcast:
+                  source: foreach_step
+                  output_format: text
+                  field: result/data/title
+            output:
+              - broadcast: true
+            action:
+              executor: llm
+              model: meta-llama/Meta-Llama-3.1-8B-Instruct
+              prompt: PROMPT_STEP_1_JSON
+              system_content: SYSTEM_CONTENT_STEP_1
+              max_tokens: 4000
+
+
+          loop_step5:
+            description: "Sending data to Wordpress"
+            type: wordpress
+            input:
+              - broadcast:
+                  source: loop_step1
+                  output_format: dict
+                  field: data/result
+            output:
+              - wordpress:
+                  connector: wp-loopai-plugin
+            action:
+              executor: wordpress
+              model: ''
+              prompt: ''
+              system_content: ''
+              max_tokens: 0
