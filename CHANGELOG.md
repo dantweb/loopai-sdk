@@ -5,7 +5,7 @@
     - wordpress adapter v1.2.0
     - telegram adabter beta-1.0.0
 ### Changed
-    - debugging
+    - debugging timeout 
 ### Fixed
     - file upload
     - max tokens count
