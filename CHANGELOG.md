@@ -1,7 +1,9 @@
 # loopAI SDK changelog
 ## [Unreleased]
 ### Added
-    - everything
+    - BroadCast Data API v1.0.0
+    - wordpress adapter v1.2.0
+    - telegram adabter beta-1.0.0
 ### Changed
     - debugging
 ### Fixed
