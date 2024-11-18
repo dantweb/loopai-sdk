@@ -6,6 +6,7 @@
     - telegram adabter beta-1.0.0
 ### Changed
     - debugging timeout 
+    - better json handling
 ### Fixed
     - file upload
     - max tokens count
