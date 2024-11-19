@@ -117,5 +117,6 @@ Flask-Testing==0.8.1
 feedparser==6.0.8
 python-socketio==5.11.3
 redis==5.2.0
+bcrypt==4.2.0
 
 
