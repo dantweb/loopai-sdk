@@ -18,8 +18,8 @@ DB_HOST=${POSTGRESQL_DB_HOST:-db}
 DB_PORT=${POSTGRESQL_DB_PORT:-5432}
 DB_NAME=${POSTGRESQL_DB_NAME}
 
-# Generate an MD5 hash of the password 'loopai'
-ENCRYPTED_PASSWORD=ENCRYPTED_PASSWORD=$(docker-compose exec -T web python3 -c "import bcrypt; print(bcrypt.hashpw(b'loopai_2025'.encode('utf-8'), bcrypt.gensalt()).decode())")
+# Generate an MD5 hash of the password 'loopai_2025'
+ENCRYPTED_PASSWORD=$(docker-compose exec -T web python3 -c "import bcrypt; print(bcrypt.hashpw(b'loopai_2025'.encode('utf-8'), bcrypt.gensalt()).decode())")
 
 
 
@@ -45,3 +45,6 @@ docker compose exec -T db psql -U "$DB_USER" -d "$DB_NAME" -c "$SQL_QUERY" || {
 }
 
 echo "Admin user setup completed."
+echo "testing...."
+
+docker-compose exec -T db psql -U "$DB_USER" -d "$DB_NAME" -c "SELECT login, password FROM \"user\" WHERE login = 'admin';"

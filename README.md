@@ -51,6 +51,22 @@ flask db upgrade -d web/migrations
   npm run serve
 ```
 
+### How to run loop from the command line or cronjob
+
+```bash
+python3 loopai_src/app.py <abs.path>/loop_config.yaml --user <userId> --loopId <loopId>
+```
+
+<abs.path> - from the very root of the container or server
+<userId> - user id from the database
+<loopId> - loop id from the database
+
+
+Here is an example how to run a loop from the command line or cronjob:
+```bash
+python3 loopai_src/app.py /abspath/var/users/1/loops/7/config/technews_llm.yaml --user 1 --loopId 7
+```
+
 ## Overview
 
 This document provides an overview of potential applications leveraging the concept of loops defined in the `loops/*.yaml` folder. These applications demonstrate the versatility and potential of using loops in various domains, automating complex processes, enhancing efficiency, and providing valuable insights.
