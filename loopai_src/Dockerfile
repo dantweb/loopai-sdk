@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     postgresql-client \
     netcat-openbsd \
+    redis-tools \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies

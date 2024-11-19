@@ -115,3 +115,7 @@ eventlet==0.37.0
 gevent==24.2.1
 Flask-Testing==0.8.1
 feedparser==6.0.8
+python-socketio==5.11.3
+redis==5.2.0
+
+
