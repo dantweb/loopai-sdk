@@ -62,6 +62,7 @@ python3 loopai_src/app.py <abs.path>/loop_config.yaml --user <userId> --loopId <
 <loopId> - loop id from the database
 
 
+
 Here is an example how to run a loop from the command line or cronjob:
 ```bash
 python3 loopai_src/app.py /abspath/var/users/1/loops/7/config/technews_llm.yaml --user 1 --loopId 7
