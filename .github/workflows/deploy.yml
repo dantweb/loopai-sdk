@@ -89,6 +89,10 @@ jobs:
 
             # Remove the temporary container
             docker rm temp_loopai_web
+            
+            echo "Cleaning up unused Docker resources..."
+            docker container prune -f
+            docker image prune -f
 
   live-prod-checkup:
     needs: deploy
