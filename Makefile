@@ -9,6 +9,9 @@ COMPOSE_FILE=docker-compose.yml
 up:
 	docker compose -f $(COMPOSE_FILE) up --remove-orphans -d
 
+upp:
+	docker compose -f $(COMPOSE_FILE) down  --remove-orphans && docker compose -f $(COMPOSE_FILE) up --build --remove-orphans -d
+
 # Target to bring down the Docker Compose services
 down:
 	docker compose -f $(COMPOSE_FILE) down  --remove-orphans

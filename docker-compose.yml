@@ -68,7 +68,23 @@ services:
     networks:
       - debug_network
 
+  redis:
+      image: redis:alpine
+      container_name: redis
+      ports:
+        - "6379:6379"
+      networks:
+        - debug_network
 
+#  test_client:
+#    build:
+#      context: ./test_client
+#      dockerfile: Dockerfile
+#    container_name: test_client
+#    depends_on:
+#      - web
+#    networks:
+#      - debug_network
 
 volumes:
   postgres_data:

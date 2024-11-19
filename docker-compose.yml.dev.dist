@@ -32,6 +32,7 @@ services:
       - ./loopai_src:/app
     depends_on:
       - db
+      - redis
     environment:
       - PYTHONPATH=/app
       - FLASK_APP=app.web  # Set to your Flask app entry point
@@ -39,6 +40,8 @@ services:
       - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
 
     logging:
       driver: "syslog"  # Using syslog driver
@@ -58,6 +61,14 @@ services:
       - "8080:80"
     environment:
       - VUE_APP_API_BASE_URL
+
+    redis:
+        image: redis:alpine
+        container_name: redis
+        ports:
+          - "6379:6379"
+        networks:
+          - debug_network
 
 volumes:
   postgres_data:
