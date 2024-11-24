@@ -42,6 +42,8 @@ services:
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    networks:
+      - shared_network
 
     logging:
       driver: "syslog"  # Using syslog driver
@@ -73,3 +75,8 @@ services:
 volumes:
   postgres_data:
     driver: local
+
+
+networks:
+  shared_network:
+    external: true

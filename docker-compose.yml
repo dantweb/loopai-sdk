@@ -14,6 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - debug_network
+      - shared_network
 
   adminer:
     image: adminer
@@ -35,11 +36,14 @@ services:
       - ./loopai_src:/app
     depends_on:
       - db
+      - redis
     environment:
       - PYTHONPATH=/app
       - FLASK_APP=app.web
       - FLASK_ENV=development
       - PYTHONUNBUFFERED=1
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
       - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
@@ -51,6 +55,7 @@ services:
         tag: "loopai_web" # Optional tag for log identification
     networks:
       - debug_network
+      - shared_network
 
   frontend:
     build:
@@ -92,4 +97,5 @@ volumes:
 
 networks:
   debug_network:
-    driver: bridge
+  shared_network:
+    external: true

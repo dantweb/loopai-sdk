@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     netcat-openbsd \
     redis-tools \
+    curl iputils-ping \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
