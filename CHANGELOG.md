@@ -4,10 +4,9 @@
     - BroadCast Data API v1.0.0
     - wordpress adapter v1.2.0
     - telegram adabter beta-1.0.0
-    - user segragation
+    - user segregation
 ### Changed
-    - debugging timeout 
-    - better json handling
+    - JSON response format
 ### Fixed
     - file upload
     - max tokens count
