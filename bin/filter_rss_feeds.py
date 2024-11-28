@@ -1,8 +1,84 @@
 import requests
 import xml.etree.ElementTree as ET
 import json
+
+ocva_sources_1 = [
+        'https://www.psychology.org/feed/',
+        'https://www.psychologicalscience.org/feed',
+        "https://www.naturalchef.com/feed/",
+        "http://hellohealthyeating.com/feed/",
+        "https://www.superhealthykids.com/feed/",
+        "https://www.ayurveda.com/feed",
+        "http://www.loveandlemons.com/feed/",
+        "https://kelliesfoodtoglow.com/feed/",
+        "https://healthynibblesandbits.com/feed/",
+        "https://chocolatecoveredkatie.com/feed/",
+        "https://vegbuffet.com/feed/",
+        "http://www.acouplecooks.com/feed/",
+        "http://onehandedcooks.com.au/feed/",
+        "https://www.psychology.org/feed/",
+        "https://foodwithfeeling.com/feed/",
+        "http://feeds.feedburner.com/FeedMePhoebe",
+        "http://feeds.feedburner.com/iowagirleats",
+        "http://feeds.feedburner.com/TheHealthyMaven",
+        "https://snapkitchen.wpengine.com/feed/",
+        "https://cleancookingcaitlin.com/feed/",
+        "https://www.twopurplefigs.com/feed/",
+        "http://feeds.feedburner.com/blogspot/OOXhN",
+        "http://feeds.feedburner.com/ThePickyEaterBlog",
+        "https://healthykitch.blogspot.com/feeds/posts/default?alt=rss",
+        "https://www.healthyseasonalrecipes.com/feed/",
+        "https://www.healthygrocerygirl.com/feed/",
+        "https://greenkitchenstories.com/feed/",
+        "https://www.joyfulhealthyeats.com/feed/",
+        "https://www.melskitchencafe.com/feed/",
+        "https://www.myfussyeater.com/feed/",
+        "https://ayurmantra.com/feed/",
+        "https://lexiscleankitchen.com/feed/",
+        "http://feeds.feedburner.com/JeanettesHealthyLiving",
+        "https://www.skinnykitchen.com/feed/",
+        "https://www.ayurvedsutra.com/ayurveda-news/feed",
+        "https://busybuthealthy.com/feed/",
+        "https://www.ambitiouskitchen.com/feed/",
+        "https://www.andarikiayurvedamonline.in/blog/feed/",
+        "https://www.yummyhealthyeasy.com/feed/",
+        "https://www.skinnytaste.com/feed/",
+        "https://www.foodfaithfitness.com/feed/",
+        "https://www.eatyourselfskinny.com/feed/",
+        "https://pieceoflulu.com/feed/",
+        "https://happyfoodhealthylife.com/feed/",
+        "https://fitmencook.com/feed/",
+        "https://junkfoodkids.com/feed/",
+        "https://www.sciencedaily.com/rss/top/health.xml",
+        "http://www.eatsamazing.co.uk/feed",
+        "http://feeds.feedburner.com/HealthfoodDesivideshi",
+        "http://www.inspiralized.com/feed",
+        "https://www.spamellab.com/feed/",
+        "https://healthyslowcooking.com/feed/",
+        "https://changinghabits.com.au/feed/",
+        "http://feeds.feedburner.com/aggieskitchen/snNz",
+        "https://plantbasedonabudget.com/feed/",
+        "https://20micronsherbal.com/feed/",
+        "https://www.fannetasticfood.com/feed/",
+        "https://www.makingthymeforhealth.com/feed/",
+        "https://nadiashealthykitchen.com/feed/",
+        "https://www.realfoodhealthybody.com/feed/",
+        "https://thelemonbowl.com/feed/",
+        "https://www.deliciousmeetshealthy.com/feed/",
+        "https://foodheavenmadeeasy.com/feed/",
+        "https://the-fit-foodie.com/feed/",
+        "https://www.alittlenutrition.com/feed/",
+        "https://lemonsandbasil.com/feed/",
+        "https://jessicasepel.com/feed/",
+        "https://thehealthyfoodie.com/feed/",
+        "https://fitfoodiefinds.com/feed/",
+        "https://www.healthshots.com/rss-feeds/healthy-eating/",
+        "https://www.healthshots.com/rss-feeds/superfoods/",
+    ]
+
+
 # List of RSS feed URLs to test
-rss_feed_urls = [
+rss_feed_urls_0 = [
     'https://www.psychology.org/feed/',  # Psychology.org
     'https://20micronsherbal.com/feed/',
     'https://www.sciencedaily.com/rss/top/health.xml',
@@ -127,7 +203,7 @@ def main():
     print("Testing RSS feed URLs...")
 
     # Validate URLs
-    valid_rss_urls = [url for url in rss_feed_urls if is_valid_rss(url)]
+    valid_rss_urls = [url for url in ocva_sources_1 if is_valid_rss(url)]
 
     # Remove duplicates
     unique_valid_rss_urls = remove_duplicates(valid_rss_urls)
@@ -135,7 +211,7 @@ def main():
     print(f"Valid RSS feeds ({len(unique_valid_rss_urls)}):", unique_valid_rss_urls)
 
     # Save the results to a JSON file
-    save_to_json(unique_valid_rss_urls, "valid_rss_feeds.json")
+    save_to_json(unique_valid_rss_urls, "valid_ocva_rss_feeds.json")
     print("Valid RSS feed URLs saved to valid_rss_feeds.json")
 
 if __name__ == "__main__":
