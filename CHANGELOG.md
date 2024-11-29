@@ -5,7 +5,7 @@
     - wordpress adapter v1.2.0
     - telegram adabter beta-1.0.0
     - user segregation
-    - project differentiation
+    - project differentiation fix
 ### Changed
     - JSON response format
 ### Fixed

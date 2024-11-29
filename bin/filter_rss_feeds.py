@@ -2,6 +2,19 @@ import requests
 import xml.etree.ElementTree as ET
 import json
 
+iot_resoureces = [
+    'https://www.iotforall.com/feed',  # IoT For All
+    'https://iotbusinessnews.com/feed/',  # IoT Business News
+    'https://www.iot-now.com/feed/',  # IoT Now
+    'https://www.iottechnews.com/news/rss/',  # IoT Tech News
+    'https://www.networkworld.com/category/internet-of-things/index.rss',  # Network World IoT
+    'https://www.zdnet.com/topic/iot/rss.xml',  # ZDNet IoT
+    'https://www.iotworldtoday.com/feed/',  # IoT World Today
+    'https://www.iotcentral.io/profiles/blogs/feed',  # IoT Central
+    'https://www.iotglobalnetwork.com/feed/',  # IoT Global Network
+    'https://www.iotm2mcouncil.org/feed/',
+]
+
 ocva_sources_1 = [
         'https://www.psychology.org/feed/',
         'https://www.psychologicalscience.org/feed',
@@ -203,7 +216,7 @@ def main():
     print("Testing RSS feed URLs...")
 
     # Validate URLs
-    valid_rss_urls = [url for url in ocva_sources_1 if is_valid_rss(url)]
+    valid_rss_urls = [url for url in iot_resoureces if is_valid_rss(url)]
 
     # Remove duplicates
     unique_valid_rss_urls = remove_duplicates(valid_rss_urls)
