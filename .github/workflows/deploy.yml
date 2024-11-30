@@ -95,6 +95,11 @@ jobs:
             # Remove the temporary container
             docker rm temp_loopai_web
             
+             # Run database migrations
+            echo "Running database migrations..."
+            docker exec -it $(docker ps -qf "ancestor=ghcr.io/${{ github.repository_owner }}/loopai_web:latest") \
+              alembic -c /app/web/migrations/alembic.ini upgrade head || { echo "Migration failed"; exit 1; }
+          
             echo "Cleaning up unused Docker resources..."
             docker container prune -f
             docker image prune -f
