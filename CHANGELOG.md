@@ -6,6 +6,7 @@
     - telegram adabter beta-1.0.0
     - user segregation
     - project differentiation fix
+    
 ### Changed
     - JSON response format
 ### Fixed
