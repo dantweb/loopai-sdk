@@ -1,6 +1,7 @@
 # config.py
 import json
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()  # Load environment variables from .env file
@@ -20,7 +21,13 @@ DATABASE_URL = f"postgresql://{POSTGRESQL_DB_USER}:{POSTGRESQL_DB_PASSWORD}@{POS
 GLOBAL_USER_ID = ''
 GLOBAL_LOOP_ID = ''
 WEB_SESSION_ID = ''
-WEB_OR_CLI = os.getenv('WEB_OR_CLI') or 'cli'
+
+RUNNING_CRON = os.getenv('RUNNING_CRON', False)
+
+if len(sys.argv) > 0 and sys.argv[0].endswith('.py') and RUNNING_CRON == False:
+    WEB_OR_CLI = 'cli'
+else:
+    WEB_OR_CLI = os.getenv('WEB_OR_CLI', 'web')
 
 # Constants
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-api-key')
