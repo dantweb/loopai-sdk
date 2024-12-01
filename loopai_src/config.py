@@ -24,10 +24,10 @@ WEB_SESSION_ID = ''
 
 RUNNING_CRON = os.getenv('RUNNING_CRON', False)
 
-if len(sys.argv) > 0 and sys.argv[0].endswith('.py') and RUNNING_CRON == False:
-    WEB_OR_CLI = 'cli'
-else:
-    WEB_OR_CLI = os.getenv('WEB_OR_CLI', 'web')
+# if len(sys.argv) > 0 and sys.argv[0].endswith('.py') and RUNNING_CRON == False:
+#     WEB_OR_CLI = 'cli'
+# else:
+WEB_OR_CLI = os.getenv('WEB_OR_CLI', 'web')
 
 # Constants
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-api-key')
