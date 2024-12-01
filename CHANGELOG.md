@@ -9,6 +9,7 @@
     
 ### Changed
     - JSON response format
+    - update project filtering by loops on cancel
 ### Fixed
     - file upload
     - max tokens count
