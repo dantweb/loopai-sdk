@@ -13,6 +13,5 @@
 ### Fixed
     - file upload
     - max tokens count
-    - newapi debug 2
-    - newapi debug 3
+    - broadcast adapter fields finding
 ### Removed

@@ -72,11 +72,39 @@ services:
         networks:
           - debug_network
 
+
+  freshrss:
+    image: freshrss/freshrss
+    container_name: freshrss
+    restart: unless-stopped
+    ports:
+      - "8183:80"
+    environment:
+      - CRON_MIN=*/20
+      - TZ=Europe/Berlin
+      - DATABASE_TYPE=pgsql
+      - DATABASE_HOST=db
+      - DATABASE_USER=${POSTGRESQL_DB_USER}
+      - DATABASE_PASSWORD=${POSTGRESQL_DB_PASSWORD}
+      - DATABASE_NAME=${POSTGRESQL_FRESH_RSS_DB_NAME}
+    depends_on:
+      - db
+    volumes:
+      - freshrss_data:/var/www/FreshRSS/data
+      - ./containers/fresh_rss/extensions:/var/www/FreshRSS/extensions
+    networks:
+      - debug_network
+      - shared_network
+
+
+
 volumes:
   postgres_data:
     driver: local
-
+  freshrss_data:
+    driver: local
 
 networks:
+  debug_network:
   shared_network:
     external: true
