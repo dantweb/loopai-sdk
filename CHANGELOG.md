@@ -6,7 +6,7 @@
     - telegram adabter beta-1.0.0
     - user segregation
     - project differentiation fix
-    
+    - cron runner
 ### Changed
     - JSON response format
     - update project filtering by loops on cancel
