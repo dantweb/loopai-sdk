@@ -10,6 +10,7 @@
 ### Changed
     - JSON response format
     - update project filtering by loops on cancel
+    - RSS extractor
 ### Fixed
     - file upload
     - max tokens count
