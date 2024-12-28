@@ -11,6 +11,7 @@
     - JSON response format
     - update project filtering by loops on cancel
     - RSS extractor fix2
+    - Featherless timeout set 120 sec
 ### Fixed
     - file upload
     - max tokens count
