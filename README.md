@@ -68,6 +68,7 @@ In the following example the execution of the loop and all the dependence and fi
  
  ```
 
+### How to run loop from the command line for multi-user installation
 the production script runs the following command:
 ```bash
  docker compose exec -T -e RUNNING_CRON=True web python3 web/command/cron_runner.py --loopId 17 --user 1
