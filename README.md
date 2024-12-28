@@ -68,6 +68,11 @@ In the following example the execution of the loop and all the dependence and fi
  
  ```
 
+the production script runs the following command:
+```bash
+ docker compose exec -T -e RUNNING_CRON=True web python3 web/command/cron_runner.py --loopId 17 --user 1
+```
+
 ## Overview
 
 This document provides an overview of potential applications leveraging the concept of loops defined in the `loops/*.yaml` folder. These applications demonstrate the versatility and potential of using loops in various domains, automating complex processes, enhancing efficiency, and providing valuable insights.
