@@ -51,20 +51,22 @@ flask db upgrade -d web/migrations
   npm run serve
 ```
 
-### How to run loop from the command line or cronjob
+### How to run loop from the command line for single user installation 
 
 ```bash
 python3 loopai_src/app.py <abs.path>/loop_config.yaml --user <userId> --loopId <loopId>
 ```
 
-<abs.path> - from the very root of the container or server
+<abs.path> - from the very root of the container or server; important to have WEB_OR_CLI=cli in the .env file
 <userId> - user id from the database
 <loopId> - loop id from the database
 
-Here is an example how to run a loop from the command line or cronjob:
+Here is an example how to run a web-based loop from the command line or cronjob from inside the container. 
+In the following example the execution of the loop and all the dependence and files is exactly same as if one runs this loop from the web:
 ```bash
-python3 loopai_src/app.py /abspath/var/users/1/loops/7/config/technews_llm.yaml --user 1 --loopId 7
-```
+ python3 web/command/cron_runner.py --loopId 17 --user 1
+ 
+ ```
 
 ## Overview
 
