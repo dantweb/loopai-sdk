@@ -12,6 +12,7 @@
     - update project filtering by loops on cancel
     - RSS extractor fix2
     - Featherless timeout set 120 sec and to requests
+    - adapt content length in technews_service to 4000 bytes for deepseek
 ### Fixed
     - file upload
     - max tokens count
