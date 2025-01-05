@@ -13,6 +13,7 @@
     - RSS extractor fix2
     - Featherless timeout set 120 sec and to requests
     - adapt content length in technews_service to 4000 bytes for deepseek
+    - add ```json remover from the llm's response when json is expected (deepseek feature)
 ### Fixed
     - file upload
     - max tokens count
