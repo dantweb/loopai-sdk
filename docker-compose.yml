@@ -22,18 +22,21 @@ services:
     restart: always
     ports:
       - "8088:8080"
+    networks:
+      - debug_network
 
-  web:
+  loopai_web:
     build:
       context: ./loopai_src
       dockerfile: Dockerfile
     container_name: loopai_web
     ports:
-      - "5000:5000"
+      - "5050:5000"
       - "5678:5678"
     working_dir: /app
     volumes:
       - ./loopai_src:/app
+      - ./bin:/app/bin
     depends_on:
       - db
       - redis
@@ -44,10 +47,14 @@ services:
       - PYTHONUNBUFFERED=1
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-      - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST}
+      - POSTGRESQL_DB_HOST=host.docker.internal
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
+      - POSTGRESQL_DB_NAME=${POSTGRESQL_DB_NAME}
+      - POSTGRESQL_DB_PASSWORD=${POSTGRESQL_DB_PASSWORD}
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRESQL_DB_USER}:${POSTGRESQL_DB_PASSWORD}@${POSTGRESQL_DB_HOST}:${POSTGRESQL_DB_PORT}/${POSTGRESQL_DB_NAME}
       - WEB_IN_DOCKER=true
+      - VUE_APP_API_BASE_HOST=${VUE_APP_API_BASE_HOST}
+      - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
     logging:
       driver: "syslog"
       options:

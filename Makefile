@@ -41,7 +41,7 @@ flash_db_upgrade:
 
 # Target to access the web container console for debugging as a non-root user
 bash:
-	docker compose exec --user appuser web /bin/bash
+	docker compose exec --user appuser loopai_web /bin/bash
 
 
 # Upgrade a Python package
@@ -50,7 +50,7 @@ upgrade-package:
 
 # Rebuild Docker images
 rebuild:
-	docker-compose build --no-cache web
+	docker-compose build --no-cache loopai_web
 
 # Run tests
 run_web_tests:

@@ -19,15 +19,14 @@ to run wp use post url string
 ### Example install
 ```
 ./bin/install.sh --web-branch production --view-branch production --core-branch production
-```
-
-### Migrations
-After installation run migrations:
-```
+make upp
 make bash
 ```
-inside the web container:
-```
+inside the web (loopai_web) container:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 flask db upgrade -d web/migrations
 ```
 

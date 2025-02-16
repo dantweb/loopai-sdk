@@ -1,13 +1,22 @@
+import os
 import sys
 import bcrypt
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Add the root directory of your project
+project_root = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(project_root)
+
 from core.services.logger_service import LoggerService
 from web.admin_models.user import User
-from core.services.postgres_db_connect import get_db_cursor # Replace with your actual SQLAlchemy User model
+from core.services.postgres_db_connect import get_db_cursor  # Replace with your actual SQLAlchemy User model
 
-def create_user(username, password, email, role="USER"):
+def create_user(name: str,
+                username: str,
+                password: str,
+                email: str,
+                role: str = "USER") -> None:
     """
     Create a new user in the database using the DatabaseConnection service.
 
@@ -25,11 +34,11 @@ def create_user(username, password, email, role="USER"):
 
         # SQL query to insert the user
         query = """
-        INSERT INTO users (login, password, email, role)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO "user" (name, login, password, email, role)
+        VALUES (%s, %s, %s, %s, %s)
         RETURNING id;
         """
-        params = (username, hashed_password, email, role)
+        params = (name, username, hashed_password, email, role)
 
         # Execute the query using DatabaseConnection
         with get_db_cursor() as cursor:
@@ -49,9 +58,10 @@ if __name__ == "__main__":
         print("Usage: python create_user_service.py <username> <password> <email> [role]")
         sys.exit(1)
 
-    username = sys.argv[1]
-    password = sys.argv[2]
-    email = sys.argv[3]
-    role = sys.argv[4] if len(sys.argv) > 4 else "USER"
+    name = sys.argv[1]
+    username = sys.argv[2]
+    password = sys.argv[3]
+    email = sys.argv[4]
+    role = sys.argv[5] if len(sys.argv) > 4 else "USER"
 
-    create_user(username, password, email, role)
+    create_user(name, username, password, email, role)
