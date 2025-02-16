@@ -2,7 +2,7 @@
 
 # Load environment variables from the .env file
 set -o allexport
-source ../.env
+source .env
 set +o allexport
 
 # Check if POSTGRESQL_DB_NAME is set
