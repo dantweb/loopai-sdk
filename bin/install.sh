@@ -56,10 +56,10 @@ get_repo_url() {
 }
 
 # Variables for branch names
-WEB_BRANCH=""
-VIEW_BRANCH=""
-CORE_BRANCH=""
-SAME_BRANCH=""
+WEB_BRANCH="production"
+VIEW_BRANCH="production"
+CORE_BRANCH="production"
+SAME_BRANCH="production"
 
 # Parsing input parameters for branch names or --all-same, and handling the --force-http flag
 while [[ "$#" -gt 0 ]]; do

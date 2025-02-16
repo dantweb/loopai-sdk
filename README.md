@@ -18,7 +18,7 @@ to run wp use post url string
 
 ### Example install
 ```
-./bin/install.sh --web-branch feature/web --view-branch develop --core-branch release/core
+./bin/install.sh --web-branch production --view-branch production --core-branch production
 ```
 
 ### Migrations
