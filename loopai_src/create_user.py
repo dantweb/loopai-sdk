@@ -34,11 +34,11 @@ def create_user(name: str,
 
         # SQL query to insert the user
         query = """
-        INSERT INTO "user" (name, login, password, email, role)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO "user" (name, login, password, email, role, active)
+        VALUES (%s, %s, %s, %s, %s, %s)
         RETURNING id;
         """
-        params = (name, username, hashed_password, email, role)
+        params = (name, username, hashed_password, email, role, True)
 
         # Execute the query using DatabaseConnection
         with get_db_cursor() as cursor:

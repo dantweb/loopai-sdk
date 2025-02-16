@@ -6,7 +6,11 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN groupadd -r -g 1000 appuser && useradd -r -u 1000 -g appuser appuser
+
+RUN groupadd -r -g 1000 appuser && \
+    useradd -m -r -u 1000 -g appuser appuser
+
+ENV HOME=/home/appuser
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -42,7 +46,7 @@ WORKDIR /app
 ENV PYTHONPATH=/app
 
 # Expose port
-EXPOSE 5000
+EXPOSE 5050
 
 # Start the application
 CMD ["./entrypoint.sh"]

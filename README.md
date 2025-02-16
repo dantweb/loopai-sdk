@@ -27,7 +27,11 @@ inside the web (loopai_web) container:
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-flask db upgrade -d web/migrations
+```
+
+outside the container run 
+```
+docker compose exec loopai_web alembic -c /app/web/migrations/alembic.ini upgrade head
 ```
 
 ## How to deploy

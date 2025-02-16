@@ -29,7 +29,7 @@ restart:
 
 
 flask:
-	docker compose exec loopai_web flask --app web/web_interface run --port 5000
+	docker compose exec loopai_web flask --app web/web_interface run --port 5050
 
 # Target to run Flask database migration
 flash_db_migrate:
