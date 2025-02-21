@@ -5,7 +5,7 @@ const io = require('socket.io-client');
 // Replace with a valid authentication token
 const token = 'YOUR_AUTH_TOKEN';
 
-const socket = io('http://web:5000', {
+const socket = io('http://web:5050', {
   query: {
     token: token,
   },
