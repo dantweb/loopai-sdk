@@ -18,4 +18,5 @@
     - file upload
     - max tokens count
     - broadcast adapter fields finding
+    - deepseek response to dict()
 ### Removed
