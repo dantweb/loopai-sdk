@@ -18,4 +18,5 @@
     - file upload
     - max tokens count
     - broadcast adapter fields finding
+    - deepseek responce processing 
 ### Removed
