@@ -41,6 +41,7 @@ jobs:
 
       - name: Copy bin directory into loopai_src
         run: |
+          rm -rf ./loopai_src/bin
           cp -R ./bin ./loopai_src/
 
       - name: Log in to GitHub Container Registry
