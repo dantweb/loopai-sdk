@@ -19,5 +19,5 @@
     - max tokens count
     - broadcast adapter fields finding
     - deepseek response to dict() --- push 
-    - fix alembic
+    - fix alembic 2
 ### Removed
