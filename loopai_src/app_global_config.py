@@ -1,4 +1,4 @@
-# config.py
+# app_global_config.py
 import json
 import os
 import sys
@@ -21,6 +21,7 @@ DATABASE_URL = f"postgresql://{POSTGRESQL_DB_USER}:{POSTGRESQL_DB_PASSWORD}@{POS
 GLOBAL_USER_ID = ''
 GLOBAL_LOOP_ID = ''
 WEB_SESSION_ID = ''
+GLOBAL_PROJECT_ID = ''
 
 RUNNING_CRON = os.getenv('RUNNING_CRON', False)
 
