@@ -7,6 +7,7 @@
     - user segregation
     - project differentiation fix
     - cron runner
+    - Project defined .env which can be overriden by loop's and loop step's .env
 ### Changed
     - JSON response format
     - update project filtering by loops on cancel
