@@ -21,4 +21,5 @@
     - broadcast adapter fields finding
     - deepseek response to dict() --- push 
     - fix alembic 2
+    - fealtehrless_service failed response proccessing
 ### Removed
