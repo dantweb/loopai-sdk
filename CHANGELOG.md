@@ -22,4 +22,5 @@
     - deepseek response to dict() --- push 
     - fix alembic 2
     - fealtehrless_service failed response proccessing
+    - change featherless time for waiting attempts
 ### Removed
