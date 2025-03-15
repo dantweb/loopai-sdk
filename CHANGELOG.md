@@ -16,6 +16,7 @@
     - adapt content length in technews_service to 4000 bytes for deepseek
     - add ```json remover from the llm's response when json is expected (deepseek feature)
     - Optimize base64_logging
+    - TextAdapter reads text and stores in BroadcastAdapter
 ### Fixed
     - file upload
     - max tokens count
