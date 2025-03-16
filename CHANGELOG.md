@@ -25,4 +25,5 @@
     - fix alembic 2
     - fealtehrless_service failed response proccessing
     - change featherless time for waiting attempts
+    - loop controller session handling, setting, cleanup broadcast
 ### Removed
