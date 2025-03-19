@@ -17,6 +17,7 @@
     - add ```json remover from the llm's response when json is expected (deepseek feature)
     - Optimize base64_logging
     - TextAdapter reads text and stores in BroadcastAdapter
+    - Remove tokens limitatiton in Featherless Service and increase timeout 300
 ### Fixed
     - file upload
     - max tokens count
