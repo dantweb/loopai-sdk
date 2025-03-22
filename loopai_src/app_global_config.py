@@ -1,7 +1,6 @@
 # app_global_config.py
 import json
 import os
-import sys
 from dotenv import load_dotenv
 
 load_dotenv()  # Load environment variables from .env file
@@ -30,14 +29,9 @@ RUNNING_CRON = os.getenv('RUNNING_CRON', False)
 # else:
 WEB_OR_CLI = os.getenv('WEB_OR_CLI', 'web')
 
-# Constants
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-api-key')
-ASSISTANT_1_API_KEY = os.getenv('ASSISTANT_1_API_KEY', 'your-assistant-api-key')
-YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', 'your-google-youtube-api-key')
-DALLE_API_URL = "your-dalle-api-url"
-
-
 ######## global functions #######
+##
+## TODO: answer: why is it here, but not in a global helper
 def is_valid_json(response):
     try:
         json.loads(response)
