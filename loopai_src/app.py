@@ -34,7 +34,7 @@ def main():
         # Attach Socket.IO
         app = create_app()
         with app.app_context():
-            controller = LoopController(args.loop)
+            controller = LoopController(args.loop, args.user, args.projectId, args.loopId)
             controller.run()
     else:
         logger_service = LoggerService()

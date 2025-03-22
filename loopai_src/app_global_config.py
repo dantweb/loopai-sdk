@@ -44,4 +44,3 @@ def is_valid_json(response):
         return True
     except ValueError:
         return False
-    pass
