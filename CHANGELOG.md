@@ -28,5 +28,5 @@
     - fealtehrless_service failed response proccessing
     - change featherless time for waiting attempts
     - loop controller session handling, setting, cleanup broadcast
-    - session manager minor fix
+    - update session manager minor fix
 ### Removed
