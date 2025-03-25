@@ -30,5 +30,5 @@
     - change featherless time for waiting attempts
     - loop controller session handling, setting, cleanup broadcast
     - update session manager minor fix
-    - step env handling
+    - step env handling 1
 ### Removed
