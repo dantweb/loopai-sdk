@@ -20,6 +20,7 @@
     - Optimize base64_logging
     - TextAdapter reads text and stores in BroadcastAdapter
     - Remove tokens limitatiton in Featherless Service and increase timeout 300
+    - HTTP adapter returns json from rss, html and json or other content as it is
 ### Fixed
     - file upload
     - max tokens count
