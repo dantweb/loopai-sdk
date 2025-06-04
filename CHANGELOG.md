@@ -10,6 +10,8 @@
     - Project defined .env which can be overriden by loop's and loop step's .env
     - More session-related variables are moved to the session_manager - t2
     - Added Http adapter to the core
+    - FileSystem Adapter and Gpt2Code_Executor
+    - Temperature config through the YAML
 ### Changed
     - JSON response format
     - update project filtering by loops on cancel
