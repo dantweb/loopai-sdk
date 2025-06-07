@@ -8,6 +8,8 @@ ENV PYTHONUNBUFFERED=1
 # Create user and group
 RUN groupadd -r -g 1000 appuser && \
     useradd -r -u 1000 -g appuser appuser
+RUN groupadd -g 991 dockersock && \
+    usermod -aG dockersock appuser
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -20,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     redis-tools \
     curl \
     iputils-ping \
+    docker.io \
     git \
     openssh-client \
  && rm -rf /var/lib/apt/lists/*
