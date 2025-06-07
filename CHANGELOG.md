@@ -23,6 +23,7 @@
     - TextAdapter reads text and stores in BroadcastAdapter
     - Remove tokens limitatiton in Featherless Service and increase timeout 300
     - HTTP adapter returns json from rss, html and json or other content as it is
+    - Bash_executor docker sync
 ### Fixed
     - file upload
     - max tokens count
