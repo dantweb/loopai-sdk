@@ -5,12 +5,11 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Create user and group
+# Create app user and group, plus additional group for dockersock
 RUN groupadd -r -g 1000 appuser && \
-    useradd -r -u 1000 -g appuser appuser
-RUN groupadd -g 991 dockersock && \
+    useradd -r -u 1000 -g appuser appuser && \
+    groupadd -g 991 dockersock && \
     usermod -aG dockersock appuser
-
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -28,33 +27,22 @@ RUN apt-get update && apt-get install -y \
     openssh-client \
  && rm -rf /var/lib/apt/lists/*
 
-# Stage 2: SSH Key and Dependencies
-FROM base AS ssh-stage
-# Copy SSH directory with proper permissions
-COPY --chown=appuser:appuser .ssh /home/appuser/.ssh
-
-# Secure SSH key
-RUN chmod 700 /home/appuser/.ssh && \
-    chmod 600 /home/appuser/.ssh/id_rsa && \
-    ssh-keyscan github.com >> /home/appuser/.ssh/known_hosts
-
-
-# Stage 3: Python Dependencies
-FROM ssh-stage AS dependencies
+# Stage 2: Python Dependencies
+FROM base AS dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install debugpy
 
-# Final Stage: Application Setup
+# Stage 3: Application Setup
 FROM dependencies AS final
 WORKDIR /app
 
-# Copy application files
+# Copy the entire application code
 COPY . /app
 
-# Create necessary directories and set permissions
+# Create necessary directories and set proper ownership
 RUN mkdir -p /app/var && \
-    chown -R appuser:appuser /app /home/appuser/.ssh
+    chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser
@@ -62,7 +50,7 @@ USER appuser
 # Set environment variables
 ENV PYTHONPATH=/app
 
-# Expose debugging and application ports
+# Expose the required ports
 EXPOSE 5678 5000
 
 # Entrypoint
