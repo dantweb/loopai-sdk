@@ -11,6 +11,7 @@ RUN groupadd -r -g 1000 appuser && \
 RUN groupadd -g 991 dockersock && \
     usermod -aG dockersock appuser
 
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
