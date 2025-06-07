@@ -5,11 +5,14 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Create app user and group, plus additional group for dockersock
+# Create the app user and groups. Adjust the docker group GID if needed.
 RUN groupadd -r -g 1000 appuser && \
     useradd -r -u 1000 -g appuser appuser && \
     groupadd -g 991 dockersock && \
-    usermod -aG dockersock appuser
+    usermod -aG dockersock appuser && \
+    # Create a docker group with GID 999 (change this if your host uses a different GID)
+    groupadd -r -g 999 docker && \
+    usermod -aG docker appuser
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
