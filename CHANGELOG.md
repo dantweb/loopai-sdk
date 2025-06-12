@@ -35,4 +35,5 @@
     - loop controller session handling, setting, cleanup broadcast
     - update session manager minor fix
     - step env handling 1
+    - file_operation 
 ### Removed
