@@ -36,4 +36,5 @@
     - update session manager minor fix
     - step env handling 1
     - file_operation 
+    - gpt2code_chunk executor
 ### Removed
