@@ -37,4 +37,5 @@
     - step env handling 1
     - file_operation 
     - gpt2code_chunk executor
+    - temperature management for o3-mini models
 ### Removed
