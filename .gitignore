@@ -9,3 +9,4 @@
 /web/*
 /app/core/tests/_data/output/*
 /loopai_src/var/users/
+/agent_post/*
