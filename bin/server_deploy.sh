@@ -12,12 +12,7 @@ docker compose up -d --build || { echo "Failed to build and start Docker contain
 
 
 create_db.sh
-
-# Run Alembic migrations
-echo "Running Alembic migrations..."
-# Execute Alembic migration commands inside the appropriate Docker container (assumed to be 'web')
-docker compose exec loopai_web alembic -c /app/web/migrations/alembic.ini upgrade head || { echo "Failed to run Alembic migrations"; exit 1; }
-
+run_migrations.sh
 # Install any missing Python packages
 echo "Installing missing Python packages..."
 docker compose exec web /app/bin/install_missing_py_pkg.sh || { echo "Failed to install missing Python packages"; exit 1; }

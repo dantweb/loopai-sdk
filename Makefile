@@ -40,8 +40,16 @@ flash_db_upgrade:
 	docker compose exec loopai_web . .venv/bin/activate && flask --app web/web_interface db upgrade
 
 # Target to access the web container console for debugging as a non-root user
-bash:
-	docker compose exec --user appuser loopai_web /bin/bash
+<bash:
+	docker compose exec --user appuser loopai_web /bin/bash<>
+
+
+# Target to access the web container console for debugging as a non-root user
+post:
+	docker compose exec agent_post /bin/bash
+
+bank:
+	docker compose exec agent_bank /bin/bash
 
 
 # Upgrade a Python package

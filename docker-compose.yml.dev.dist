@@ -96,6 +96,21 @@ services:
       - debug_network
       - shared_network
 
+  agent_msg_service:
+    build:
+      context: ./agent_msg_service
+      dockerfile: Dockerfile
+    container_name: agent_msg_service
+    ports:
+      - "5001:5000" # External port 5001 mapped to internal port 5000
+    environment:
+      FLASK_ENV: development   # Include other environment variables as needed
+    depends_on:
+      - redis                  # Example: Dependency on Redis (if your service needs it)
+      - db                     # Example: Dependency on Postgres
+    networks:
+      - debug_network
+      - shared_network
 
 
 volumes:
