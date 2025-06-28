@@ -101,36 +101,36 @@ services:
 #      - web
 #    networks:
 #      - debug_network
-
-  agent_post:
-    build:
-      context: ./agent_post
-    working_dir: /app
-    volumes:
-      - ./agent_post:/app
-    container_name: agent_post
-    ports:
-      - "5000:5000" # External port 5001 mapped to internal port 5000
-    environment:
-      FLASK_ENV: development
-    networks:
-      - debug_network
-      - shared_network
-
-  agent_bank:
-    build:
-      context: ./agent_bank
-    working_dir: /app
-    volumes:
-      - ./agent_bank:/app
-    container_name: agent_bank
-    ports:
-      - "5001:5000" # External port 5001 mapped to internal port 5000
-    environment:
-      FLASK_ENV: development
-    networks:
-      - debug_network
-      - shared_network
+#
+#  agent_post:
+#    build:
+#      context: ./agent_post
+#    working_dir: /app
+#    volumes:
+#      - ./agent_post:/app
+#    container_name: agent_post
+#    ports:
+#      - "5000:5000" # External port 5001 mapped to internal port 5000
+#    environment:
+#      FLASK_ENV: development
+#    networks:
+#      - debug_network
+#      - shared_network
+#
+#  agent_bank:
+#    build:
+#      context: ./agent_bank
+#    working_dir: /app
+#    volumes:
+#      - ./agent_bank:/app
+#    container_name: agent_bank
+#    ports:
+#      - "5001:5000" # External port 5001 mapped to internal port 5000
+#    environment:
+#      FLASK_ENV: development
+#    networks:
+#      - debug_network
+#      - shared_network
 
 
 
