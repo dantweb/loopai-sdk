@@ -1,4 +1,4 @@
-# src/app.py
+# loopai_src/app.py
 import argparse
 import os
 
