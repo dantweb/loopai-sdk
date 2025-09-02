@@ -52,6 +52,9 @@ bank:
 	docker compose exec agent_bank /bin/bash
 
 
+front:
+	docker compose exec frontend /bin/bash
+
 # Upgrade a Python package
 upgrade-package:
 	docker-compose run --entrypoint "" web pip install --upgrade $(PACKAGE)

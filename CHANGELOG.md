@@ -12,6 +12,8 @@
     - Added Http adapter to the core
     - FileSystem Adapter and Gpt2Code_Executor
     - Temperature config through the YAML
+    - Agents
+    - Root executor - executes just on the host, while bash executor does it in docker
 ### Changed
     - JSON response format
     - update project filtering by loops on cancel
