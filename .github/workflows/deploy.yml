@@ -76,7 +76,7 @@ jobs:
           
           docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest 
 
-  deploy:
+  deploy_server_2:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -90,6 +90,10 @@ jobs:
             # Navigate to the deployment directory
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             ls -la
+            
+            # Log in to GHCR
+            echo "${{ secrets.DANTWEB_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          
             docker network ls | grep "shared_network" || docker network create shared_network
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
@@ -112,7 +116,7 @@ jobs:
             docker image prune -f
 
   live-prod-checkup:
-    needs: deploy
+    needs: deploy_server_2
     runs-on: ubuntu-latest
     steps:
       - name: Install curl
