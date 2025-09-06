@@ -40,8 +40,8 @@ flash_db_upgrade:
 	docker compose exec loopai_web . .venv/bin/activate && flask --app web/web_interface db upgrade
 
 # Target to access the web container console for debugging as a non-root user
-<bash:
-	docker compose exec --user appuser loopai_web /bin/bash<>
+bash:
+	docker compose exec --user appuser loopai_web /bin/bash
 
 
 # Target to access the web container console for debugging as a non-root user
@@ -69,3 +69,4 @@ run_web_tests:
 	  -e OPENBLAS_VERBOSE=0 \
 	  web \
 	  python -W ignore::DeprecationWarning -m unittest discover -s web/tests -p "test*.py" -v
+
