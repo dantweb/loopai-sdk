@@ -85,7 +85,7 @@ jobs:
         with:
           host: ${{ secrets.LOOPAI_SERVER2_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.LOOPAI_SERVER2_IP_SSH_PRIVATE_KEY }}
           script: |
             # Navigate to the deployment directory
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
