@@ -145,8 +145,6 @@ jobs:
             echo "Running containers: $RUNNING_CONTAINERS"
             echo "Total services: $TOTAL_SERVICES"
             
-            make app_network 
-            
             if [ "$RUNNING_CONTAINERS" -ne "$TOTAL_SERVICES" ]; then
               echo "Error: Not all Docker containers are running."
               docker compose ps
