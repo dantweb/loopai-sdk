@@ -78,6 +78,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LOOPAI_SERVER2_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.LOOPAI_SERVER2_IP_SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml,.env,.env.frontend,.env.web,Makefile,run_migrations.sh,docker-cleanup.sh"
+          target: "/home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app"
+          overwrite: true
       - name: Run server-side deployment script
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -85,35 +96,22 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.LOOPAI_SERVER2_IP_SSH_PRIVATE_KEY }}
           script: |
-            # Navigate to the deployment directory
+            # Verify block storage is mounted
+            mountpoint -q /loopai_storage || { echo "Block storage not mounted"; exit 1; }
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
-            ls -la
-            
-            # Log in to GHCR
-            echo "${{ secrets.DANTWEB_DEPLOY_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-          
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             docker network ls | grep "shared_network" || docker network create shared_network
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
-            
-            # Ensure the bin directory exists on the server
             mkdir -p ./bin
-
-            # Create a temporary container from the latest loopai_web image
             docker create --name temp_loopai_web ghcr.io/${{ github.repository_owner }}/loopai_web:latest
-
-            # Copy the bin directory from the temporary container to the server's bin directory
             docker cp temp_loopai_web:/app/bin/. ./bin/ || { echo "Failed to copy bin scripts"; exit 1; }
-
-            # Remove the temporary container
             docker rm temp_loopai_web
-            
-            
-            echo "Cleaning up unused Docker resources..."
             docker container prune -f
             docker image prune -f
+            docker logout ghcr.io
 
-  live-prod-checkup:
+  post_deploy_checks_server_2:
     needs: deploy_server_2
     runs-on: ubuntu-latest
     steps:
@@ -123,9 +121,9 @@ jobs:
       - name: Verify All Docker Containers Are Running
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_IP }}
+          host: ${{ secrets.LOOPAI_SERVER2_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.LOOPAI_SERVER2_IP_SSH_PRIVATE_KEY }}
           script: |
             #!/bin/bash
 
@@ -135,7 +133,9 @@ jobs:
 
             # Navigate to the deployment directory
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
-
+            
+            make app_network
+            
             # Get the number of running containers
             RUNNING_CONTAINERS=$(docker compose ps --filter "status=running" | grep "Up" | wc -l)
 
@@ -144,7 +144,9 @@ jobs:
 
             echo "Running containers: $RUNNING_CONTAINERS"
             echo "Total services: $TOTAL_SERVICES"
-
+            
+            make app_network 
+            
             if [ "$RUNNING_CONTAINERS" -ne "$TOTAL_SERVICES" ]; then
               echo "Error: Not all Docker containers are running."
               docker compose ps
