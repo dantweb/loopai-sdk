@@ -53,7 +53,7 @@ bank:
 
 
 front:
-	docker compose exec frontend /bin/bash
+	docker compose exec frontend bash
 
 # Upgrade a Python package
 upgrade-package:
@@ -70,3 +70,5 @@ run_web_tests:
 	  web \
 	  python -W ignore::DeprecationWarning -m unittest discover -s web/tests -p "test*.py" -v
 
+app_network:
+	docker network inspect app_network >/dev/null 2>&1 || docker network create --driver bridge app_network
