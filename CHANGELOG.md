@@ -26,6 +26,7 @@
     - Remove tokens limitatiton in Featherless Service and increase timeout 300
     - HTTP adapter returns json from rss, html and json or other content as it is
     - Bash_executor docker sync
+    - Better BroadcastAdapter and BroadcastModel
 ### Fixed
     - file upload
     - max tokens count

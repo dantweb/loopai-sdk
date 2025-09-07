@@ -80,6 +80,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DANTWEB_DEPLOY_TOKEN }}
+
       - name: Run server-side deployment script
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -105,7 +112,6 @@ jobs:
 
             # Remove the temporary container
             docker rm temp_loopai_web
-            
             
             echo "Cleaning up unused Docker resources..."
             docker container prune -f
@@ -144,8 +150,6 @@ jobs:
             echo "Total services: $TOTAL_SERVICES"
 
             if [ "$RUNNING_CONTAINERS" -ne "$TOTAL_SERVICES" ]; then
-              echo "Error: Not all Docker containers are running."
-              docker compose ps
               echo "Try to restart all Docker containers..."
               docker compose up -d
               exit 1
