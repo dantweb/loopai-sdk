@@ -215,6 +215,7 @@ jobs:
               echo "All Docker containers are running successfully."
             fi
 
+
       - name: Verify Frontend Accessibility
         run: |
           echo "Checking frontend accessibility at http://${{ secrets.LOOPAI_SERVER2_IP }}:${{ secrets.PROD_WEB_PORT80 }}/..."
