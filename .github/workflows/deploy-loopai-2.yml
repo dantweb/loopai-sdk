@@ -66,14 +66,17 @@ jobs:
           docker build -t ghcr.io/${{ github.repository_owner }}/loopai_web:latest ./loopai_src
           docker push ghcr.io/${{ github.repository_owner }}/loopai_web:latest
 
-      - name: Build and Push Frontend Docker Image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest \
-            --build-arg VUE_APP_API_BASE_URL=${{ secrets.LOOPAI_PROD_2_API_BASE_URL }} \
-            --build-arg VUE_APP_API_BASE_HOST=${{ secrets.LOOPAI_PROD_2_API_BASE_HOST }} \
-            -f ./loopai_src/view/vue/admin/Dockerfile.frontend ./loopai_src/view/vue/admin
-          
-          docker push ghcr.io/dantweb/vue_admin:latest
+      - name: Build and push frontend (buildx)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./loopai_src/view/vue/admin
+          file: ./loopai_src/view/vue/admin/Dockerfile.frontend
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/vue_admin:latest
+          build-args: |
+            VUE_APP_API_BASE_URL=${{ secrets.LOOPAI_PROD_2_API_BASE_URL }}
+            VUE_APP_API_BASE_HOST=${{ secrets.LOOPAI_PROD_2_API_BASE_HOST }}
 
   deploy:
     needs: build
