@@ -11,3 +11,4 @@
 /loopai_src/var/users/
 /agent_post/*
 /agent_bank/*
+docker-compose.yml
