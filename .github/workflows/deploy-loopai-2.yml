@@ -68,13 +68,13 @@ jobs:
 
       - name: Build and Push Frontend Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest \
+          docker buildx build --platform linux/amd64 \
+            -t ghcr.io/${{ github.repository_owner }}/vue_admin:latest \
             --build-arg VUE_APP_API_BASE_URL=${{ secrets.LOOPAI_PROD_2_API_BASE_URL }} \
             --build-arg VUE_APP_API_BASE_HOST=${{ secrets.LOOPAI_PROD_2_API_BASE_HOST }} \
             -f ./loopai_src/view/vue/admin/Dockerfile.frontend \
-            ./loopai_src/view/vue/admin
-          
-          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest 
+            ./loopai_src/view/vue/admin \
+            --push
 
   deploy:
     needs: build
@@ -192,7 +192,7 @@ jobs:
             # Navigate to the deployment directory
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             
-            docker network inspect app_network >/dev/null 2>&1 || docker network create --driver bridge app_network
+            docker network inspect app_network || docker network create --driver bridge app_network
             
             # Get the number of running containers
             RUNNING_CONTAINERS=$(docker compose ps --filter "status=running" | grep "Up" | wc -l)
