@@ -1,5 +1,5 @@
 # loopAI SDK changelog
-## [v2.7.0-rc1]
+## [v2.7.0-rc1 -- unreleased]
 ### Added
     - BroadCast Data API v1.0.0
     - wordpress adapter v1.2.0
