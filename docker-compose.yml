@@ -60,10 +60,10 @@ services:
       - VUE_APP_API_BASE_HOST=${VUE_APP_API_BASE_HOST}
       - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
     logging:
-      driver: "syslog"
+      driver: "json-file"
       options:
-        syslog-address: "udp://localhost:514"
-        tag: "loopai_web" # Optional tag for log identification
+        max-size: "10m"
+        max-file: "3"
     networks:
       - debug_network
       - shared_network
