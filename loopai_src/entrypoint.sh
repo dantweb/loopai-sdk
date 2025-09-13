@@ -41,4 +41,4 @@ echo "PYTHONPATH is set to: $PYTHONPATH"
 
 # Start the Flask application
 echo "Starting the Flask application..."
-exec python -m web
+exec gunicorn -c /app/web/gunicorn.conf.py --worker-class gevent web.__main__:app
