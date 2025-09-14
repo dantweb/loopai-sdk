@@ -43,6 +43,8 @@ flash_db_upgrade:
 bash:
 	docker compose exec --user appuser loopai_web /bin/bash
 
+root:
+	docker compose exec --user root loopai_web /bin/bash
 
 # Target to access the web container console for debugging as a non-root user
 post:
