@@ -27,6 +27,7 @@
     - HTTP adapter returns json from rss, html and json or other content as it is
     - Bash_executor docker sync
     - Better BroadcastAdapter and BroadcastModel
+    - Better loops and agent running
 ### Fixed
     - file upload
     - max tokens count
