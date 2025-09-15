@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y \
 FROM base AS dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install debugpy grequests httpx
+RUN pip install debugpy grequests httpx gevent-websocket
 
 # Stage 3: Application Setup
 FROM dependencies AS final
