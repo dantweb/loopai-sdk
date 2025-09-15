@@ -28,6 +28,7 @@
     - Bash_executor docker sync
     - Better BroadcastAdapter and BroadcastModel
     - Better loops and agent running
+    - Docker and Bash
 ### Fixed
     - file upload
     - max tokens count
