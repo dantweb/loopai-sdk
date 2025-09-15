@@ -28,7 +28,7 @@
     - Bash_executor docker sync
     - Better BroadcastAdapter and BroadcastModel
     - Better loops and agent running
-    - Docker and Bash
+    - Docker and Bash and todos://resolve=RuntimeError: Cannot run the event loop while another loop is running
 ### Fixed
     - file upload
     - max tokens count
