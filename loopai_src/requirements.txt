@@ -19,6 +19,7 @@ aiohttp==3.9.5
 redis==5.0.1
 python-socketio==5.11.3
 gunicorn==22.0.0
+uvicorn[standard]==0.30.6
 async-timeout==4.0.3
 
 # API and Utilities
@@ -48,4 +49,4 @@ bcrypt==4.2.0
 # Debugging and Testing
 debugpy==1.8.16
 pytest>=8.3.5
-
+psutil>=7.0.0

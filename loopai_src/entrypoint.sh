@@ -42,5 +42,5 @@ echo "PYTHONPATH is set to: $PYTHONPATH"
 # Start the Flask application
 echo "Starting the Flask application..."
 
-#exec gunicorn -c /app/web/gunicorn.conf.py --worker-class gevent web.__main__:app
-exec gunicorn -c /app/web/gunicorn.conf.py --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker web.__main__:app
+# Use ASGI app with uvicorn worker for async Flask routes support
+exec gunicorn -c /app/web/gunicorn.conf.py web.__main__:asgi_app
