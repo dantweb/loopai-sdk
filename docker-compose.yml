@@ -59,11 +59,14 @@ services:
       - WEB_IN_DOCKER=true
       - VUE_APP_API_BASE_HOST=${VUE_APP_API_BASE_HOST}
       - VUE_APP_API_BASE_URL=${VUE_APP_API_BASE_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    command: [ "gunicorn", "-c", "/app/web/gunicorn.conf.py", "--worker-class", "gevent", "web.__main__:app" ]
+
     networks:
       - debug_network
       - shared_network

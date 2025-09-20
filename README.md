@@ -213,3 +213,8 @@ loop:
       input:
         prompt: "Analyze the performance report and suggest strategy adjustments: {performance_report.yaml}"
       output: strategy.yaml
+
+## command to test
+make bash
+cd core
+python -m unittest discover tests.unit
