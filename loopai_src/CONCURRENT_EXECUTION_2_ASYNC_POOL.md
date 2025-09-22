@@ -121,28 +121,21 @@ class AsyncLoopManager:
                 self._update_status(execution_id, ExecutionStatus.FAILED)
 ```
 
-### 3. Update Existing Route Files
+### 3. Clean Route Implementation - Direct Replacement
 
-#### Update `web/routes/loops.py` - Add New Endpoints
+#### Add `web/routes/loops_public.py` - Replace Existing Endpoints
 ```python
 from web.services.async_loop_manager import get_async_loop_manager
-from flask import Response
+from flask import Response, request, jsonify, current_app, g
 import json
 import time
 
-# Keep existing endpoints for backward compatibility
-@loops_bp.route('/runloop/<int:loop_id>', methods=['GET'])  # Existing blocking endpoint
-def run_loop_blocking(loop_id):
-    """Legacy blocking endpoint - keep for backward compatibility"""
-    # Current implementation stays the same
-    pass
-
-# NEW: Add async execution endpoints
+# REPLACE existing blocking endpoint run_loop with async version start_loop
 @loops_bp.route('/api/loops/<int:loop_id>/start', methods=['POST'])
-def start_loop_async(loop_id):
+def start_loop(loop_id):
     """Start loop execution asynchronously"""
     try:
-        user_id = get_current_user_id()  # Use your existing auth method
+        user_id = get_current_user_id()
         manager = get_async_loop_manager()
 
         execution_id = manager.start_execution(
@@ -237,25 +230,45 @@ def get_user_executions(user_id):
         return jsonify({"error": str(e)}), 500
 ```
 
-#### Update `web/routes/agents.py` - Add New Endpoints
+#### Update `web/routes/agents.py` - Replace Existing Endpoints
 ```python
 from web.services.async_loop_manager import get_async_loop_manager
 
-# Keep existing endpoints for backward compatibility
+# REPLACE existing blocking endpoint with async version
 @agents_bp.route('/api/public/agent/<int:agent_id>/action/<action_name>/', methods=['POST'])
-def run_agent_action_blocking(agent_id, action_name):
-    """Legacy blocking endpoint - keep for backward compatibility"""
-    # Current implementation stays the same for now
-    # Will be updated to use async manager in later phases
-    pass
-
-# NEW: Add async execution endpoints for agents
-@agents_bp.route('/api/agents/<int:agent_id>/action/<action_name>/start', methods=['POST'])
-def start_agent_action_async(agent_id, action_name):
-    """Start agent action asynchronously"""
+def run_agent_action(agent_id, action_name):
+    """Run agent action asynchronously - returns execution_id immediately"""
     try:
-        # For authenticated agent actions
-        user_id = get_current_user_id() if hasattr(g, 'current_user') else None
+        manager = get_async_loop_manager()
+
+        execution_id = manager.start_execution(
+            app=current_app,
+            user_id=None,  # Public endpoint
+            loop_id=None,
+            agent_id=agent_id,
+            action_name=action_name,
+            request_data=request.get_json() if request.is_json else None
+        )
+
+        return jsonify({
+            "success": True,
+            "execution_id": execution_id,
+            "message": f"Agent {agent_id} action {action_name} started",
+            "status_url": f"/api/executions/{execution_id}/status"
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+# ADD authenticated agent endpoint
+@agents_bp.route('/api/agents/<int:agent_id>/action/<action_name>/start', methods=['POST'])
+@token_required
+def start_agent_action(current_user, agent_id, action_name):
+    """Start authenticated agent action asynchronously"""
+    try:
+        user_id = current_user.user_id if hasattr(g, 'current_user') else None
         manager = get_async_loop_manager()
 
         execution_id = manager.start_execution(
@@ -277,81 +290,359 @@ def start_agent_action_async(agent_id, action_name):
             "success": False,
             "error": str(e)
         }), 500
-
-@agents_bp.route('/api/public/agent/<int:agent_id>/action/<action_name>/start', methods=['POST'])
-def start_public_agent_action_async(agent_id, action_name):
-    """Start public agent action asynchronously"""
-    try:
-        manager = get_async_loop_manager()
-
-        execution_id = manager.start_execution(
-            app=current_app,
-            user_id=None,  # Public endpoint
-            loop_id=None,
-            agent_id=agent_id,
-            action_name=action_name,
-            request_data=request.get_json() if request.is_json else None
-        )
-
-        return jsonify({
-            "success": True,
-            "execution_id": execution_id,
-            "message": f"Public agent {agent_id} action {action_name} started"
-        })
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
 ```
 
-### 4. Gradually Update Existing Endpoints
+### 5. Session Management in Threaded Environment
 
-#### Phase 1: Keep Both Old and New
+#### **Session-Dependent Components Architecture**
+
+Instead of duplicating session access code across components, all session-dependent services will inherit from a common abstract base class:
+
 ```python
-# In web/routes/loops.py - during migration phase
+# New file: core/services/session_dependent.py
+from abc import ABC
+from typing import Optional
+import threading
+from core.services.session import session_manager, SessionContext
 
-@loops_bp.route('/runloop/<int:loop_id>', methods=['GET'])
-def run_loop_legacy(loop_id):
-    """Legacy blocking endpoint - will be deprecated"""
-    # Current blocking implementation
-    # Add deprecation warning in response headers
-    response = make_response(current_blocking_implementation())
-    response.headers['X-Deprecated'] = 'Use /api/loops/{loop_id}/start for async execution'
-    return response
+class SessionDependent(ABC):
+    """Abstract base class for all components that depend on session context"""
 
-@loops_bp.route('/api/loops/run', methods=['POST'])
-def run_loop_api(loop_id):
-    """Updated to use async execution"""
-    # Gradually migrate this to use async manager
-    # Can return execution_id instead of blocking
-    manager = get_async_loop_manager()
-    execution_id = manager.start_execution(...)
+    def __init__(self):
+        self._session_manager = session_manager
 
-    return jsonify({
-        "success": True,
-        "execution_id": execution_id,
-        "message": "Loop execution started. Check status at /api/executions/{execution_id}/status"
-    })
+    @property
+    def current_session(self) -> Optional[SessionContext]:
+        """Get current thread's session context"""
+        return self._session_manager.get_current_session()
+
+    @property
+    def user_id(self) -> Optional[int]:
+        """Get current user ID from session context"""
+        session = self.current_session
+        return session.user_id if session else None
+
+    @property
+    def loop_id(self) -> Optional[int]:
+        """Get current loop ID from session context"""
+        session = self.current_session
+        return session.loop_id if session else None
+
+    @property
+    def execution_id(self) -> Optional[str]:
+        """Get current execution ID from session context"""
+        session = self.current_session
+        return session.execution_id if session else None
+
+    @property
+    def agent_id(self) -> Optional[int]:
+        """Get current agent ID from session context"""
+        session = self.current_session
+        return session.agent_id if session else None
+
+    @property
+    def session_id(self) -> Optional[str]:
+        """Get current session ID"""
+        session = self.current_session
+        return session.session_id if session else None
+
+    def require_session(self) -> SessionContext:
+        """Get current session or raise exception if none"""
+        session = self.current_session
+        if not session:
+            raise RuntimeError("No active session context in current thread")
+        return session
+
+    def log_with_context(self, message: str, level: str = "info"):
+        """Log message with session context"""
+        context_info = f"[{self.execution_id}|U:{self.user_id}|L:{self.loop_id}]"
+        full_message = f"{context_info} {message}"
+
+        # Use appropriate logging method
+        if hasattr(self, '_logger'):
+            getattr(self._logger, level)(full_message)
+        else:
+            print(f"[{level.upper()}] {full_message}")
 ```
 
-#### Phase 2: Update Frontend Routes
+#### **Updated Session Manager**
+
 ```python
-# After frontend is updated, modify existing endpoints to be async
-@loops_bp.route('/runloop/<int:loop_id>', methods=['GET'])
-def run_loop_updated(loop_id):
-    """Updated to return execution_id instead of blocking"""
-    manager = get_async_loop_manager()
-    execution_id = manager.start_execution(...)
+# Enhanced core/services/session.py
+@dataclass
+class SessionContext:
+    session_id: str
+    execution_id: str
+    user_id: int
+    loop_id: int
+    agent_id: Optional[int]
+    action_name: Optional[str]
+    request_data: Optional[Dict]
+    created_at: float
+    broadcast_collection: List
+    broadcast_data_json: List
+    thread_id: int = None
 
-    return jsonify({
-        "success": True,
-        "execution_id": execution_id,
-        "redirect_to_status": f"/api/executions/{execution_id}/status"
-    })
+    def __post_init__(self):
+        if self.thread_id is None:
+            self.thread_id = threading.get_ident()
+
+class SessionManager:
+    def __init__(self):
+        self._sessions = {}  # session_id -> SessionContext
+        self._thread_local = threading.local()
+        self._lock = threading.RLock()
+
+    def create_isolated_session(self, execution_id, user_id, loop_id, agent_id=None, action_name=None, request_data=None):
+        """Create a new session context for isolated thread execution"""
+        session_id = f"exec_{execution_id}_{int(time.time())}"
+
+        with self._lock:
+            session_context = SessionContext(
+                session_id=session_id,
+                execution_id=execution_id,
+                user_id=user_id,
+                loop_id=loop_id,
+                agent_id=agent_id,
+                action_name=action_name,
+                request_data=request_data,
+                created_at=time.time(),
+                broadcast_collection=[],
+                broadcast_data_json=[]
+            )
+            self._sessions[session_id] = session_context
+
+        return session_id
+
+    def set_current_session(self, session_id):
+        """Set the current session for this thread"""
+        self._thread_local.current_session_id = session_id
+
+    def get_current_session(self) -> Optional[SessionContext]:
+        """Get the current session context for this thread"""
+        session_id = getattr(self._thread_local, 'current_session_id', None)
+        if session_id and session_id in self._sessions:
+            return self._sessions[session_id]
+        return None
+
+    def cleanup_session(self):
+        """Clean up current thread's session"""
+        session_id = getattr(self._thread_local, 'current_session_id', None)
+        if session_id:
+            with self._lock:
+                self._sessions.pop(session_id, None)
+            self._thread_local.current_session_id = None
+
+# Global session manager instance
+session_manager = SessionManager()
 ```
 
-### 5. Convert Async Operations to Sync
+#### **Component Implementations Using SessionDependent**
+
+```python
+# core/adapters/broadcast_adapter.py
+from core.services.session_dependent import SessionDependent
+
+class BroadcastAdapter(SessionDependent):
+    def __init__(self):
+        super().__init__()
+
+    def broadcast(self, data, event_type="data"):
+        """Broadcast data within current session context"""
+        session = self.require_session()  # Will raise if no session
+
+        broadcast_data = BroadcastData(data, event_type)
+        session.broadcast_collection.append(broadcast_data)
+
+        # Log with context
+        self.log_with_context(f"Broadcasting {event_type} data: {type(data).__name__}")
+
+        # Emit via SocketIO
+        self._emit_to_socketio(broadcast_data)
+
+    def _emit_to_socketio(self, broadcast_data):
+        """Emit broadcast data via SocketIO for real-time updates"""
+        try:
+            from web.web_interface import socketio
+            socketio.emit('execution_update', {
+                'execution_id': self.execution_id,
+                'timestamp': time.time(),
+                'data': broadcast_data.to_serializable(),
+                'type': 'broadcast'
+            }, room=f"execution_{self.execution_id}")
+        except Exception as e:
+            self.log_with_context(f"SocketIO broadcast failed: {e}", "warning")
+
+# core/services/logger_service.py
+from core.services.session_dependent import SessionDependent
+
+class LoggerService(SessionDependent):
+    def __init__(self, component=None):
+        super().__init__()
+        self.component = component or "loopai"
+        self._logger = self._setup_logger()
+
+    def info(self, message):
+        """Log info message with session context"""
+        if self.current_session:
+            context = f"[{self.execution_id}|U:{self.user_id}|L:{self.loop_id}]"
+            self._logger.info(f"{context} {message}")
+        else:
+            self._logger.info(message)
+
+    def error(self, message):
+        """Log error message with session context"""
+        if self.current_session:
+            context = f"[{self.execution_id}|U:{self.user_id}|L:{self.loop_id}]"
+            self._logger.error(f"{context} {message}")
+        else:
+            self._logger.error(message)
+
+# core/services/file_service.py
+from core.services.session_dependent import SessionDependent
+
+class FileSystemService(SessionDependent):
+    def __init__(self):
+        super().__init__()
+
+    def get_user_directory(self):
+        """Get user directory path based on session context"""
+        if not self.user_id:
+            raise ValueError("No user context available")
+        return f"/app/var/users/{self.user_id}"
+
+    def get_loop_directory(self):
+        """Get loop directory path based on session context"""
+        if not self.user_id or not self.loop_id:
+            raise ValueError("No user/loop context available")
+        return f"/app/var/users/{self.user_id}/loops/{self.loop_id}"
+
+    def save_execution_artifact(self, filename, content):
+        """Save file in execution-specific directory"""
+        execution_dir = f"{self.get_loop_directory()}/executions/{self.execution_id}"
+        os.makedirs(execution_dir, exist_ok=True)
+
+        file_path = os.path.join(execution_dir, filename)
+        with open(file_path, 'w') as f:
+            f.write(content)
+
+        self.log_with_context(f"Saved execution artifact: {filename}")
+        return file_path
+
+# core/controllers/loop_controller.py
+from core.services.session_dependent import SessionDependent
+
+class LoopController(SessionDependent):
+    def __init__(self, loop_file_path, user_id=None, project_id=None, loop_id=None):
+        super().__init__()
+        self.loop_file_path = loop_file_path
+        self._logger = LoggerService()
+
+        # Use session context if available, fallback to parameters
+        session = self.current_session
+        if session:
+            self.user_id = session.user_id
+            self.loop_id = session.loop_id
+            self.project_id = project_id  # Could be derived from session
+        else:
+            # Fallback for backward compatibility
+            self.user_id = user_id
+            self.project_id = project_id
+            self.loop_id = loop_id
+
+    def run_sync(self):
+        """Synchronous loop execution for thread pool"""
+        self.log_with_context(f"Starting loop execution from {self.loop_file_path}")
+
+        # All broadcast operations automatically use session context
+        broadcast_adapter.broadcast({
+            "message": "Loop execution started",
+            "loop_file": self.loop_file_path
+        }, "execution_start")
+
+        # Rest of implementation...
+        # All logging and broadcasting automatically includes session context
+```
+
+#### **AsyncLoopManager Integration**
+
+```python
+# In web/services/async_loop_manager.py
+def _run_loop(self, execution_id, app, user_id, loop_id, agent_id, action_name, request_data):
+    """Run loop in isolated thread with proper session management"""
+    with app.app_context():
+        try:
+            # Create isolated session context for this thread
+            thread_session_id = session_manager.create_isolated_session(
+                execution_id=execution_id,
+                user_id=user_id,
+                loop_id=loop_id,
+                agent_id=agent_id,
+                action_name=action_name,
+                request_data=request_data
+            )
+
+            # Set thread-local session context
+            session_manager.set_current_session(thread_session_id)
+
+            # Update execution status
+            self._update_status(execution_id, ExecutionStatus.RUNNING)
+
+            # Now all SessionDependent components automatically have access to context
+            if agent_id and action_name:
+                result = self._execute_agent_action(agent_id, action_name, request_data)
+            else:
+                result = self._execute_loop_direct(user_id, loop_id)
+
+            # Capture broadcast data (automatically collected in session)
+            session = session_manager.get_current_session()
+            final_result = {
+                'execution_result': result,
+                'broadcast_collection': session.broadcast_collection,
+                'broadcast_collection_json': session.broadcast_data_json,
+                'session_id': thread_session_id
+            }
+
+            self.executions[execution_id].result = final_result
+            self._update_status(execution_id, ExecutionStatus.COMPLETED)
+
+        except Exception as e:
+            self.executions[execution_id].error = str(e)
+            self._update_status(execution_id, ExecutionStatus.FAILED)
+        finally:
+            session_manager.cleanup_session()
+```
+
+#### **Benefits of SessionDependent Architecture**
+
+✅ **DRY Principle**: No duplicate session access code across components
+✅ **Consistent Interface**: All components access session data the same way
+✅ **Easy Context Logging**: Automatic context information in all logs
+✅ **Type Safety**: Optional typing for all session properties
+✅ **Error Handling**: `require_session()` for components that need session
+✅ **Backward Compatibility**: Graceful fallback when no session available
+✅ **Thread Safety**: Session manager handles all thread-local access
+
+#### **Migration Strategy for Existing Components**
+
+```python
+# Simple migration pattern:
+# OLD:
+class SomeService:
+    def do_something(self):
+        from core.services.session import session_manager
+        session = session_manager.get_current_session()
+        user_id = session.user_id if session else None
+        # ... rest of logic
+
+# NEW:
+class SomeService(SessionDependent):
+    def do_something(self):
+        # user_id automatically available as self.user_id
+        # ... rest of logic unchanged
+```
+
+### 6. Convert Async Operations to Sync
 
 #### Replace aiohttp with requests
 ```python
@@ -658,31 +949,116 @@ export default {
 };
 ```
 
-### 7. Code to Drop
+### 7. Legacy Files to Remove
 
-#### A. Remove gevent-specific code
-- `web/services/threaded_loop_executor.py` - Replace with simpler async manager
-- Any gevent monkey patching in app initialization
-- gevent-specific SocketIO configuration
-
-#### B. Remove complex async isolation code
-```python
-# Remove all this complex event loop handling:
-def run_async_in_executor():
-    with app.app_context():
-        try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            # ... complex isolation logic
+#### A. Files That Will Be Completely Removed
+```
+web/services/threaded_loop_executor.py          - Complex async isolation, replaced by async_loop_manager.py
+web/services/web_loop_runner.py                 - Blocking loop execution, logic moved to async_loop_manager.py
+web/services/concurrent_web_loop_runner.py      - If exists, experimental concurrency attempts
 ```
 
-#### C. Simplify to direct thread execution
+#### B. Functions/Code Blocks to Remove
 ```python
-# Replace with simple:
-def run_loop_in_thread(execution_id, loop_id):
-    with app.app_context():
-        result = execute_loop_synchronously(loop_id)
-        store_result(execution_id, result)
+# From web/routes/loops.py - remove any blocking execution functions:
+def execute_loop_synchronously(...)             # Replaced by async manager
+def run_loop_blocking(...)                      # Direct blocking execution
+
+# From web/routes/agents.py - remove blocking agent execution:
+def execute_agent_action_blocking(...)          # Replaced by async manager
+
+# From app initialization files:
+import gevent.monkey                            # Remove gevent imports
+gevent.monkey.patch_all()                       # Remove monkey patching
+```
+
+#### C. Dependencies to Remove from requirements.txt
+```diff
+- gevent==24.2.1                               # Core gevent library
+- gevent-websocket==0.10.1                     # WebSocket support for gevent
+- flask-socketio==5.3.6                        # If using gevent backend (keep if using threading)
+```
+
+#### D. Configuration to Update
+```python
+# In SocketIO initialization:
+# REMOVE:
+socketio = SocketIO(app, async_mode='gevent')
+
+# REPLACE WITH:
+socketio = SocketIO(app, async_mode='threading')
+```
+
+#### E. Import Statements to Remove/Update
+```python
+# Remove these imports from various files:
+from web.services.threaded_loop_executor import execute_loop_in_isolated_thread
+from web.services.web_loop_runner import run_loop_sync
+from gevent import monkey
+import gevent
+
+# Replace with:
+from web.services.async_loop_manager import get_async_loop_manager
+```
+
+#### F. Database/Model Changes (if any)
+```python
+# If there are any tables/fields specifically for blocking execution:
+# - Remove execution_status fields that assume blocking behavior
+# - Add execution_id tracking fields if needed
+```
+
+#### G. Frontend Files That May Become Unused
+```javascript
+// If there are any gevent/blocking-specific frontend utilities:
+// src/utils/blockingRequestHandler.js       - If exists
+// src/services/longPollingService.js        - If replaced by SSE
+```
+
+#### H. Configuration Files to Clean Up
+```yaml
+# docker-compose.yml - remove gevent-specific environment variables:
+# - GEVENT_SUPPORT=1
+# - ASYNC_MODE=gevent
+
+# .env files - remove gevent-related configurations:
+# - GEVENT_POOL_SIZE=1000
+# - SOCKETIO_ASYNC_MODE=gevent
+```
+
+#### I. Test Files That Will Need Updates
+```python
+# Tests that assume blocking behavior:
+tests/test_blocking_loop_execution.py          # Update to test async execution
+tests/test_gevent_integration.py               # Remove if gevent-specific
+tests/test_threaded_executor.py                # Update to test async_loop_manager
+
+# Integration tests:
+tests/integration/test_long_running_loops.py   # Update to use execution_id pattern
+```
+
+#### J. Documentation to Update/Remove
+```
+docs/gevent_setup.md                          # Remove gevent setup instructions
+docs/blocking_execution.md                    # Update to async execution
+README.md                                      # Update installation/setup instructions
+DEPLOYMENT.md                                  # Remove gevent-related deployment steps
+```
+
+#### K. Helper Scripts/Utilities
+```bash
+scripts/start_gevent_server.sh                # Remove gevent startup scripts
+scripts/gevent_worker_monitor.sh              # Remove gevent monitoring
+scripts/patch_gevent.py                       # Remove gevent patching utilities
+```
+
+#### L. Potential Backup/Archive Strategy
+Before deletion, consider archiving these files:
+```bash
+mkdir -p archive/removed_files/$(date +%Y%m%d)
+mv web/services/threaded_loop_executor.py archive/removed_files/$(date +%Y%m%d)/
+mv web/services/web_loop_runner.py archive/removed_files/$(date +%Y%m%d)/
+# Archive other removed files...
 ```
 
 ### 8. Testing Concurrent Execution
@@ -723,28 +1099,29 @@ if __name__ == "__main__":
     asyncio.run(test_concurrent_execution())
 ```
 
-### 9. Migration Steps
+### 9. Implementation Steps
 
-#### Phase 1: Preparation
-1. Create async loop manager
-2. Add new API endpoints
-3. Test new endpoints alongside old ones
+#### Step 1: Backend Implementation
+1. **Create async loop manager** - `web/services/async_loop_manager.py`
+2. **Remove gevent dependencies** - Update `requirements.txt` and remove monkey patching
+3. **Replace route endpoints** - Direct replacement in `loops.py` and `agents.py`
+4. **Update SocketIO backend** - Change from gevent to threading mode
 
-#### Phase 2: Frontend Update
-1. Update frontend to use new async endpoints
-2. Add progress UI components
-3. Test concurrent execution from UI
+#### Step 2: Frontend Updates
+1. **Update LoopApi.js** - Add new async execution methods
+2. **Update ApiService.js** - Expose new methods
+3. **Update LoopDetails.vue** - Replace blocking calls with async polling
+4. **Add cancellation UI** - Cancel button and execution state management
 
-#### Phase 3: Remove gevent
-1. Remove gevent from requirements.txt
-2. Remove gevent-specific code
-3. Update SocketIO to use threading backend
-4. Remove old blocking endpoints
+#### Step 3: Cleanup
+1. **Remove `threaded_loop_executor.py`** - Replace with simple async manager
+2. **Convert async operations to sync** - Replace aiohttp with requests, etc.
+3. **Remove complex isolation code** - Simplify to direct thread execution
 
-#### Phase 4: Cleanup
-1. Remove complex async isolation code
-2. Simplify loop execution to pure sync in threads
-3. Remove unused files and functions
+#### Step 4: Testing
+1. **Test concurrent execution** - Multiple simultaneous loops
+2. **Test status tracking** - Progress updates and completion
+3. **Test cancellation** - Ability to stop running loops
 
 ### 10. Benefits After Implementation
 

@@ -13,8 +13,6 @@ SQLAlchemy==2.0.35
 psycopg2-binary==2.9.9
 
 # Asynchronous and Networking
-gevent==24.2.1
-gevent-websocket==0.10.1
 aiohttp==3.9.5
 redis==5.0.1
 python-socketio==5.11.3
