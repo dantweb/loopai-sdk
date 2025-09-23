@@ -303,7 +303,8 @@ Instead of duplicating session access code across components, all session-depend
 from abc import ABC
 from typing import Optional
 import threading
-from core.services.session import session_manager, SessionContext
+from core.services.session_manager import session_manager, SessionContext
+
 
 class SessionDependent(ABC):
     """Abstract base class for all components that depend on session context"""
@@ -630,16 +631,17 @@ def _run_loop(self, execution_id, app, user_id, loop_id, agent_id, action_name, 
 # OLD:
 class SomeService:
     def do_something(self):
-        from core.services.session import session_manager
+        from core.services.session_manager import session_manager
         session = session_manager.get_current_session()
         user_id = session.user_id if session else None
         # ... rest of logic
 
+
 # NEW:
 class SomeService(SessionDependent):
     def do_something(self):
-        # user_id automatically available as self.user_id
-        # ... rest of logic unchanged
+# user_id automatically available as self.user_id
+# ... rest of logic unchanged
 ```
 
 ### 6. Convert Async Operations to Sync

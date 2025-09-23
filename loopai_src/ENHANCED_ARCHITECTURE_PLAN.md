@@ -2143,19 +2143,23 @@ class LoopController:
 ### Common Operations - Use Existing Methods
 
 #### 1. File System Path Operations
+
 ```python
 # ❌ WRONG - Don't duplicate path logic
 def get_user_loop_path(user_id: int, loop_id: int):
     return f"/app/var/users/{user_id}/loops/{loop_id}"
 
+
 # ✅ CORRECT - Use existing methods
-from core.services.session import SessionManager
+from core.services.session_manager import SessionManager
+
 session_manager = SessionManager()
 user_path = session_manager.get_user_adirectory_path(user_id)
 loop_path = session_manager.get_loop_directory_path(user_id, loop_id)
 ```
 
 #### 2. Loop Configuration Loading
+
 ```python
 # ❌ WRONG - Don't reimplement config loading
 def load_loop_config(user_id: int, loop_id: int):
@@ -2163,8 +2167,10 @@ def load_loop_config(user_id: int, loop_id: int):
     with open(config_path, 'r') as f:
         return yaml.safe_load(f)
 
+
 # ✅ CORRECT - Use existing configuration loader
-from core.services.session import SessionManager
+from core.services.session_manager import SessionManager
+
 session_manager = SessionManager()
 config_path = session_manager.get_loop_config_path(user_id, loop_id)
 config = session_manager.load_loop_configuration(config_path)
@@ -2223,9 +2229,11 @@ logger.info(session_id, message)  # Much clearer intent
 - **BroadcastService**: Real-time communication with frontend
 
 #### 3. Method Discovery Pattern
+
 ```python
 # Always check what methods are available before implementing
-from core.services.session import SessionManager
+from core.services.session_manager import SessionManager
+
 session_manager = SessionManager()
 
 # Discover available methods
