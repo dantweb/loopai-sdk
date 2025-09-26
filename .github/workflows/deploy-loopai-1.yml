@@ -74,7 +74,7 @@ jobs:
             -f ./loopai_src/view/vue/admin/Dockerfile.frontend \
             ./loopai_src/view/vue/admin
           
-          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest_prod_1 
+          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest_prod_1
 
   deploy:
     needs: build
@@ -91,6 +91,7 @@ jobs:
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             ls -la
             docker network ls | grep "shared_network" || docker network create shared_network
+
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
             

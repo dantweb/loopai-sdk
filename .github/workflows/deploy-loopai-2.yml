@@ -78,6 +78,12 @@ jobs:
             VUE_APP_API_BASE_URL=${{ secrets.LOOPAI_PROD_2_API_BASE_URL }}
             VUE_APP_API_BASE_HOST=${{ secrets.LOOPAI_PROD_2_API_BASE_HOST }}
 
+      - name: Debug build arguments
+        run: |
+         echo "API URL Build Arg: ${{ secrets.LOOPAI_PROD_2_API_BASE_URL }}"
+         echo "API HOST Build Arg: ${{ secrets.LOOPAI_PROD_2_API_BASE_HOST }}"
+
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -100,8 +106,9 @@ jobs:
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             ls -la
             docker network ls | grep "shared_network" || docker network create shared_network
-            docker compose pull
-            docker compose up -d --remove-orphans --force-recreate
+            docker compose pull loopai_web
+            docker compose pull frontend
+            docker compose up -d --remove-orphans --no-deps --force-recreate 
             
             # Ensure the bin directory exists on the server
             mkdir -p ./bin
