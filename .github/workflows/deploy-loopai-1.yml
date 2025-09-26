@@ -74,7 +74,7 @@ jobs:
             -f ./loopai_src/view/vue/admin/Dockerfile.frontend \
             ./loopai_src/view/vue/admin
           
-          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest_prod_! 
+          docker push ghcr.io/${{ github.repository_owner }}/vue_admin:latest_prod_1 
 
   deploy:
     needs: build
