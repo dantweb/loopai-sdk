@@ -14,6 +14,7 @@
     - Temperature config through the YAML
     - Agents
     - Root executor - executes just on the host, while bash executor does it in docker
+    - Added siultaneius threaded execution and runner tracking
 ### Changed
     - JSON response format
     - update project filtering by loops on cancel
@@ -29,6 +30,7 @@
     - Better BroadcastAdapter and BroadcastModel
     - Better loops and agent running
     - Docker and Bash and todos://resolve=RuntimeError: Cannot run the event loop while another loop is running
+    - CORS handling
 ### Fixed
     - file upload
     - max tokens count
