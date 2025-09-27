@@ -90,8 +90,7 @@ jobs:
             # Navigate to the deployment directory
             cd /home/${{ secrets.SERVER_USERNAME }}/web_server/loopai_app
             ls -la
-            docker network ls | grep "shared_network" || docker network create shared_network
-            docker network ls | grep "app_network" || docker network create app_network
+            docker network ls | grep "app-network" || docker network create app-network
 
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
