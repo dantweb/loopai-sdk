@@ -47,4 +47,5 @@
     - gpt2code_chunk executor
     - temperature management for o3-mini models
     - fix socketIO
+    - worker limitations
 ### Removed
