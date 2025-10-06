@@ -16,6 +16,7 @@
     - Root executor - executes just on the host, while bash executor does it in docker
     - Added siultaneius threaded execution and runner tracking
     - Better filesystem_adapter and json recognition
+    - AgentLife page with real time agent communicaiton monitoring and interacitons
 ### Changed
     - JSON response format
     - update project filtering by loops on cancel
