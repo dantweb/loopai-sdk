@@ -49,4 +49,5 @@
     - temperature management for o3-mini models
     - fix socketIO
     - worker limitations
+    - fix project_id in env compilation
 ### Removed
