@@ -50,4 +50,5 @@
     - fix socketIO
     - worker limitations
     - fix project_id in env compilation
+    - fix session_manager in cron_run
 ### Removed
