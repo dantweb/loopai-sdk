@@ -12,7 +12,7 @@
 
 # -------- Configuration --------
 # Define the array of file extensions to include (without the dot)
-FILE_TYPES=("txt" "sh" "md" "py" "js" "env" "yml")  # Modify as needed
+FILE_TYPES=("txt" "sh" "md" "py" "js" "env" "yml" "json" "yaml")  # Modify as needed
 # ---------------------------------
 
 # Function to display usage information
