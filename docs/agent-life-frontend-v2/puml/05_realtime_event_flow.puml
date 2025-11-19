@@ -1,0 +1,233 @@
+@startuml Agent Life v2 - Real-Time Event Flow
+!theme vibrant
+skinparam backgroundColor #FAFAFA
+skinparam roundcorner 10
+skinparam shadowing true
+skinparam sequenceMessageAlign center
+
+title Agent Life v2 - Real-Time Socket.IO Event Flow
+
+actor "User" as User #4169E1
+participant "Frontend\n(Vue.js)" as Frontend #32CD32
+participant "Socket.IO\nClient" as SocketClient #FF6347
+participant "Socket.IO\nServer" as SocketServer #FF8C00
+participant "Redis\nPub/Sub" as Redis #9370DB
+participant "Status\nAggregator" as StatusAgg #FF69B4
+participant "Action\nOrchestrator" as Orchestrator #FFD700
+participant "Agent\nService" as Agent #00CED1
+
+== Connection & Subscription ==
+
+User -> Frontend : Opens Monitor tab
+activate Frontend
+
+Frontend -> SocketClient : Initialize connection
+activate SocketClient
+
+SocketClient -> SocketServer : Connect with JWT token
+activate SocketServer
+
+SocketServer --> SocketClient : Connection established
+note right: Socket ID assigned
+
+Frontend -> SocketClient : emit('subscribe_cycle_updates',\n{execution_id, user_id})
+SocketClient -> SocketServer : Forward subscription
+SocketServer -> SocketServer : Join room\n'cycle_<execution_id>'
+SocketServer --> SocketClient : Subscription confirmed
+SocketClient --> Frontend : Ready to receive events
+
+== Cycle Execution with Real-Time Updates ==
+
+Orchestrator -> Agent : Execute action\n"READ_POSTS"
+activate Agent
+activate Orchestrator
+
+Orchestrator -> StatusAgg : Action started event
+activate StatusAgg
+
+StatusAgg -> StatusAgg : Create log entry\nin database
+
+StatusAgg -> SocketServer : emit('agent_action_started',\n{agent_id, action_name})
+SocketServer -> Redis : Publish to\ncycle_<execution_id>
+activate Redis
+Redis --> SocketServer : Confirmed
+deactivate Redis
+
+SocketServer --> SocketClient : Broadcast to room\n'cycle_<execution_id>'
+note right #FFE4B5
+  Event data:
+  {
+    execution_id: "abc-123",
+    agent_id: "FRBG/agent1",
+    action_name: "READ_POSTS",
+    timestamp: "2025-11-19T10:00:00Z"
+  }
+end note
+
+SocketClient --> Frontend : Emit 'agent_action_started'
+Frontend -> Frontend : Update Pinia store
+Frontend -> Frontend : Update UI:\n- Agent status badge\n- Progress bar\n- Log viewer
+Frontend --> User : Display update
+deactivate StatusAgg
+
+Agent --> Orchestrator : Action completed
+deactivate Agent
+
+Orchestrator -> StatusAgg : Action completed event
+activate StatusAgg
+
+StatusAgg -> StatusAgg : Create log entry\nCalculate duration
+
+StatusAgg -> SocketServer : emit('agent_action_completed',\n{agent_id, action_name, duration})
+SocketServer -> Redis : Publish event
+activate Redis
+Redis --> SocketServer : Confirmed
+deactivate Redis
+
+SocketServer --> SocketClient : Broadcast completion
+SocketClient --> Frontend : Emit 'agent_action_completed'
+Frontend -> Frontend : Update UI:\n- Mark action complete\n- Update statistics\n- Add to logs
+Frontend --> User : Show completion
+deactivate StatusAgg
+
+== Progress Update ==
+
+Orchestrator -> StatusAgg : Progress update\n(every 15 seconds)
+activate StatusAgg
+
+StatusAgg -> StatusAgg : Calculate metrics:\n- Percentage\n- Success rate\n- ETA
+
+StatusAgg -> SocketServer : emit('cycle_progress_update',\n{execution_id, progress})
+SocketServer -> Redis : Publish progress
+activate Redis
+Redis --> SocketServer : Confirmed
+deactivate Redis
+
+SocketServer --> SocketClient : Broadcast progress
+note right #E0FFE0
+  Progress data:
+  {
+    current_day: 2,
+    total_days: 3,
+    percentage: 66.7,
+    completed_actions: 20,
+    total_actions: 30,
+    success_rate: 95.0
+  }
+end note
+
+SocketClient --> Frontend : Emit progress update
+Frontend -> Frontend : Animate progress bar
+Frontend -> Frontend : Update counters
+Frontend --> User : Visual feedback
+deactivate StatusAgg
+
+== Action Failure Scenario ==
+
+Orchestrator -> Agent : Execute action\n"DO_ACTION"
+activate Agent
+activate Orchestrator
+
+Agent --> Orchestrator : Action failed\nwith error
+deactivate Agent
+
+Orchestrator -> StatusAgg : Action failed event
+activate StatusAgg
+
+StatusAgg -> StatusAgg : Log error\nIncrement fail count
+
+StatusAgg -> SocketServer : emit('agent_action_failed',\n{agent_id, action_name, error})
+SocketServer -> Redis : Publish error
+activate Redis
+Redis --> SocketServer : Confirmed
+deactivate Redis
+
+SocketServer --> SocketClient : Broadcast failure
+note right #FFE0E0
+  Error data:
+  {
+    agent_id: "FRBG/agent1",
+    action_name: "DO_ACTION",
+    error: "Connection timeout",
+    timestamp: "2025-11-19T10:15:00Z"
+  }
+end note
+
+SocketClient --> Frontend : Emit error event
+Frontend -> Frontend : Show error alert
+Frontend -> Frontend : Update agent status\nto "failed"
+Frontend -> Frontend : Add error to logs\nwith red highlight
+Frontend --> User : Display error notification
+deactivate StatusAgg
+deactivate Orchestrator
+
+== User Control Action ==
+
+User -> Frontend : Clicks "Pause"
+Frontend -> Frontend : API call:\nPOST .../pause/
+note left: Non-Socket.IO\nREST API call
+
+Frontend -> SocketClient : Wait for status update
+
+StatusAgg -> SocketServer : emit('cycle_status_update',\n{execution_id, status: 'paused'})
+activate StatusAgg
+SocketServer -> Redis : Publish status change
+activate Redis
+Redis --> SocketServer : Confirmed
+deactivate Redis
+
+SocketServer --> SocketClient : Broadcast status
+SocketClient --> Frontend : Emit status update
+Frontend -> Frontend : Update UI:\n- Disable pause button\n- Enable resume button\n- Show paused badge
+Frontend --> User : Visual confirmation
+deactivate StatusAgg
+
+== Completion & Cleanup ==
+
+Orchestrator -> StatusAgg : Cycle completed
+activate StatusAgg
+activate Orchestrator
+
+StatusAgg -> SocketServer : emit('cycle_status_update',\n{status: 'completed'})
+SocketServer -> Redis : Publish completion
+activate Redis
+Redis --> SocketServer : Confirmed
+deactivate Redis
+
+SocketServer --> SocketClient : Broadcast completion
+SocketClient --> Frontend : Emit completion
+Frontend -> Frontend : Show success notification
+Frontend -> Frontend : Update analytics
+Frontend --> User : Display results
+deactivate StatusAgg
+deactivate Orchestrator
+
+User -> Frontend : Navigates away
+Frontend -> SocketClient : emit('unsubscribe_cycle_updates',\n{execution_id})
+SocketClient -> SocketServer : Forward unsubscribe
+SocketServer -> SocketServer : Leave room
+SocketServer --> SocketClient : Unsubscribed
+deactivate SocketServer
+deactivate SocketClient
+deactivate Frontend
+
+legend right
+  |= Event Type |= Color |
+  | Connection | <back:#E0E0E0>   </back> |
+  | Action Started | <back:#FFE4B5>   </back> |
+  | Action Completed | <back:#E0FFE0>   </back> |
+  | Action Failed | <back:#FFE0E0>   </back> |
+  | Progress Update | <back:#E0F0FF>   </back> |
+endlegend
+
+note over User, Agent
+  **Key Features:**
+  • Real-time updates without polling
+  • Room-based event targeting
+  • Redis pub/sub for scaling
+  • Throttled progress updates (15s)
+  • Automatic reconnection
+  • Event persistence in database
+end note
+
+@enduml

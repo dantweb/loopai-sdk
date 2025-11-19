@@ -1,0 +1,217 @@
+@startuml Agent Life v2 - Action Constellation Flow
+!theme vibrant
+skinparam backgroundColor #F5F5F5
+skinparam roundcorner 15
+skinparam shadowing true
+
+title Agent Life v2 - Action Constellation Execution Flow
+
+|#LightBlue|ActionOrchestrator|
+start
+
+:Load cycle configuration;
+
+:Load constellation from\nconstellation_id;
+
+note right
+  Constellation structure:
+  {
+    "actions": [
+      {action: "READ_POSTS"},
+      {loop: {...}},
+      {action: "VALIDATE_WORK"}
+    ]
+  }
+end note
+
+:Parse constellation sequence;
+
+partition "Day Loop" {
+  repeat :For day 1 to N;
+
+    :Broadcast: Start day X;
+
+    partition "Action Sequence" {
+      repeat :For each action in sequence;
+
+        if (Action type?) then (single action)
+
+          |#LightGreen|Execute Single Action|
+          :Get action definition;
+
+          partition "Agent Loop" {
+            repeat :For each agent;
+
+              |#LightCoral|Call Agent API|
+              :POST /api/public/agent/<id>/\naction/<ACTION_NAME>/;
+
+              if (Success?) then (yes)
+                :Log success;
+                :Increment completed_actions;
+              else (no)
+                :Log error;
+                :Increment failed_actions;
+
+                if (Retry enabled?) then (yes)
+                  :Wait backoff_seconds;
+                  :Retry (up to max_attempts);
+                else (no)
+                endif
+              endif
+
+            repeat while (more agents?)
+          }
+
+          :Wait action_wait_seconds;
+
+        elseif (loop?) then (loop)
+
+          |#LightYellow|Execute Loop|
+          :Get loop configuration:
+          * actions array
+          * iterations count;
+
+          partition "Loop Iterations" {
+            repeat :For iteration 1 to N;
+
+              :Broadcast: Loop iteration X/N;
+
+              partition "Nested Actions" {
+                repeat :For each action in loop;
+
+                  partition "Execute Nested" {
+                    :Execute action\n(same as single action);
+                    :Wait action_wait_seconds;
+                  }
+
+                repeat while (more actions in loop?)
+              }
+
+            repeat while (more iterations?)
+          }
+
+        elseif (condition?) then (condition)
+
+          |#LightPink|Conditional Execution|
+          :Evaluate condition;
+
+          if (Condition true?) then (yes)
+            :Execute true_actions branch;
+          else (no)
+            :Execute false_actions branch;
+          endif
+
+        elseif (parallel?) then (parallel)
+
+          |#LightCyan|Parallel Execution|
+          fork
+            :Execute action 1;
+          fork again
+            :Execute action 2;
+          fork again
+            :Execute action 3;
+          end fork
+
+          if (wait_for_all?) then (yes)
+            :Wait for all to complete;
+          else (no)
+            :Continue when first completes;
+          endif
+
+        endif
+
+        |ActionOrchestrator|
+        :Update progress;
+        :Broadcast progress update;
+
+      repeat while (more actions in sequence?)
+    }
+
+    :Day complete;
+
+    if (Check reflection?) then (day % reflection_frequency == 0)
+
+      |#LightPurple|Run Reflection|
+      partition "REFLEX Action" {
+        repeat :For each agent;
+          :POST /api/public/agent/<id>/\naction/REFLEX/;
+          :Log reflection completed;
+        repeat while (more agents?)
+      }
+
+    else (skip)
+    endif
+
+    if (More days?) then (yes)
+      :Wait day_wait_seconds;
+      :Broadcast: Starting next day;
+    else (no)
+    endif
+
+  repeat while (more days?)
+}
+
+:Calculate final statistics;
+:Update execution status\nto "completed";
+:Broadcast: Cycle complete;
+
+stop
+
+note right of "Execute Single Action"
+  **Standard Actions:**
+  • READ_POSTS
+  • GET_WORK
+  • PREPARE_ACTION
+  • DO_ACTION
+  • VALIDATE_ACTION
+  • VALIDATE_WORK
+  • REFLEX
+end note
+
+note right of "Execute Loop"
+  **Loop Example:**
+  {
+    "type": "loop",
+    "iterations": 3,
+    "actions": [
+      {"action": "PREPARE_ACTION"},
+      {"action": "DO_ACTION"},
+      {"action": "VALIDATE_ACTION"}
+    ]
+  }
+end note
+
+note right of "Conditional Execution"
+  **Future Feature:**
+  {
+    "type": "condition",
+    "condition": "agent.role == 'Backend'",
+    "true_actions": [...],
+    "false_actions": [...]
+  }
+end note
+
+note right of "Parallel Execution"
+  **Future Feature:**
+  {
+    "type": "parallel",
+    "wait_for_all": true,
+    "actions": [
+      {"action": "FETCH_DATA"},
+      {"action": "PROCESS_CACHE"}
+    ]
+  }
+end note
+
+legend right
+  |= Color |= Component |
+  | <back:#LightBlue>   </back> | Orchestrator Main |
+  | <back:#LightGreen>   </back> | Single Action |
+  | <back:#LightYellow>   </back> | Loop Execution |
+  | <back:#LightPink>   </back> | Conditional (Future) |
+  | <back:#LightCyan>   </back> | Parallel (Future) |
+  | <back:#LightPurple>   </back> | Reflection |
+  | <back:#LightCoral>   </back> | Agent API Call |
+endlegend
+
+@enduml

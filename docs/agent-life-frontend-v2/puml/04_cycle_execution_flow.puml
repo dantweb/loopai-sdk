@@ -1,0 +1,190 @@
+@startuml Agent Life v2 - Cycle Execution Flow
+!theme vibrant
+skinparam backgroundColor #F5F5F5
+skinparam roundcorner 10
+skinparam shadowing true
+
+title Agent Life v2 - Cycle Execution Flow
+
+|User|
+start
+:Open Cycles Tab;
+:Click "Create Cycle";
+
+|#LightBlue|Frontend|
+:Display Cycle\nConfiguration Form;
+:User fills form:
+* Name
+* Days (1-30)
+* Agents
+* Constellation
+* Timing;
+
+|#LightGreen|API|
+:POST /api/agentlife/cycles/;
+:Validate input;
+
+|#LightYellow|CycleManager|
+:Create cycle configuration;
+:Save to database;
+:Return cycle object;
+
+|User|
+:View created cycle\nin list;
+:Click "Start";
+
+|Frontend|
+:Confirm start dialog;
+
+|API|
+:POST /api/agentlife/cycles/<id>/start/;
+
+|CycleManager|
+:Create execution record\nwith status "queued";
+:Calculate total actions;
+
+|#LightPink|ActionOrchestrator|
+:Queue execution\nfor background processing;
+
+fork
+  |ActionOrchestrator|
+  :Start execution;
+  :Update status to "running";
+
+  repeat
+    :Get constellation sequence;
+
+    repeat :For each day (1 to N);
+
+      repeat :For each action in sequence;
+
+        if (Action type?) then (single action)
+          :Execute action\nfor all agents;
+
+          |#LightCoral|StatusAggregator|
+          :Log action started;
+          :Broadcast Socket.IO event;
+
+          |ActionOrchestrator|
+          :Wait for completion;
+
+          if (Success?) then (yes)
+            :Mark action completed;
+            |StatusAggregator|
+            :Log success;
+            :Broadcast completion;
+          else (no)
+            :Mark action failed;
+            |StatusAggregator|
+            :Log error;
+            :Broadcast failure;
+          endif
+
+        else (loop)
+          repeat :For N iterations;
+            :Execute nested actions;
+          repeat while (more iterations?)
+        endif
+
+        :Wait action_wait_seconds;
+
+      repeat while (more actions in day?)
+
+      if (Day complete?) then (yes)
+        :Check reflection schedule;
+        if (Day % 5 == 0?) then (yes)
+          :Run REFLEX action;
+        endif
+      endif
+
+      if (More days?) then (yes)
+        :Wait day_wait_seconds;
+      endif
+
+    repeat while (more days?)
+
+    :Mark execution "completed";
+    |StatusAggregator|
+    :Log completion;
+    :Broadcast final status;
+
+  repeat while (false) is (complete)
+
+fork again
+  |#LightSkyBlue|Frontend (Monitor)|
+  :Subscribe to Socket.IO events;
+
+  repeat
+    :Receive status updates;
+    :Update UI:
+    * Progress bar
+    * Agent statuses
+    * Execution logs;
+    :Display real-time changes;
+  repeat while (execution running?)
+
+  :Show completion notification;
+  :Unsubscribe from events;
+
+fork again
+  |User|
+
+  if (User action during execution?) then (pause)
+    :Click "Pause";
+    |API|
+    :POST .../pause/;
+    |CycleManager|
+    :Update status to "paused";
+    :Signal orchestrator;
+    |ActionOrchestrator|
+    :Pause after current action;
+
+    :Wait for user action;
+
+    if (User clicks?) then (resume)
+      :Click "Resume";
+      |API|
+      :POST .../resume/;
+      |CycleManager|
+      :Update status to "running";
+      :Continue execution;
+    else (stop)
+      :Click "Stop";
+      |API|
+      :POST .../stop/;
+      |CycleManager|
+      :Update status to "stopped";
+      :Terminate execution;
+      stop
+    endif
+
+  else (complete normally)
+  endif
+
+end fork
+
+|User|
+:View execution\nhistory & analytics;
+
+stop
+
+note right
+  **Parallel Operations:**
+  1. Orchestrator executes cycle
+  2. Frontend monitors progress
+  3. User can control execution
+
+  All synchronized via Socket.IO
+end note
+
+legend right
+  |= Color |= Component |
+  | <back:#LightBlue>   </back> | Frontend |
+  | <back:#LightGreen>   </back> | API Layer |
+  | <back:#LightYellow>   </back> | CycleManager |
+  | <back:#LightPink>   </back> | ActionOrchestrator |
+  | <back:#LightCoral>   </back> | StatusAggregator |
+  | <back:#LightSkyBlue>   </back> | Real-time Monitor |
+endlegend
+
+@enduml

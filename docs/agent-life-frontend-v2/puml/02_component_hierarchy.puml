@@ -1,0 +1,218 @@
+@startuml Agent Life v2 - Component Hierarchy
+!theme vibrant
+skinparam backgroundColor #F5F5F5
+skinparam roundcorner 15
+skinparam shadowing true
+skinparam packageStyle rectangle
+
+title Agent Life v2 - Frontend Component Hierarchy
+
+package "AgentLife.vue (Root)" #4169E1 {
+
+  package "Shared State & Services" #FF6347 {
+    component "Pinia Store" as Store #DC143C {
+      [cycles state]
+      [executions state]
+      [constellations state]
+      [agent statuses]
+    }
+
+    component "Socket.IO" as Socket #FF4500 {
+      [connection manager]
+      [event listeners]
+      [room subscriptions]
+    }
+
+    component "API Service" as API #FF8C00 {
+      [HTTP client]
+      [auth interceptor]
+      [error handler]
+    }
+  }
+
+  package "Tab 1: Chat" #32CD32 {
+    component "AgentLifeChat.vue" as Chat #228B22 {
+      [Message List]
+      [Message Input]
+      [Filter Controls]
+      [Agent Selector]
+    }
+  }
+
+  package "Tab 2: Cycles" #1E90FF {
+    component "AgentLifeCycles.vue" as Cycles #4169E1 {
+
+      package "Child Components" #87CEEB {
+        component "CycleList.vue" as CycleList #5F9EA0 {
+          [Filter Bar]
+          [Search Input]
+          [Cycle Cards]
+          [Pagination]
+        }
+
+        component "CycleConfigForm.vue" as CycleForm #4682B4 {
+          [Name Input]
+          [Days Slider]
+          [Agent Selector]
+          [Constellation Dropdown]
+          [Timing Config]
+          [Schedule Options]
+        }
+
+        component "CycleControlPanel.vue" as ControlPanel #00CED1 {
+          [Status Display]
+          [Control Buttons]
+          [Progress Bar]
+          [Agent Summary]
+        }
+      }
+    }
+  }
+
+  package "Tab 3: Monitor" #FF69B4 {
+    component "AgentLifeMonitor.vue" as Monitor #DB7093 {
+
+      package "Child Components" #FFB6C1 {
+        component "CycleProgressView.vue" as ProgressView #C71585 {
+          [Progress Bar]
+          [Day Counter]
+          [Action Counter]
+          [Statistics Grid]
+          [Timing Info]
+        }
+
+        component "AgentStatusDashboard.vue" as StatusDashboard #FF1493 {
+          [Agent Cards]
+          [Status Badges]
+          [Action History]
+          [Error Alerts]
+        }
+
+        component "ExecutionLogsViewer.vue" as LogsViewer #FF69B4 {
+          [Log Container]
+          [Level Filter]
+          [Auto-scroll Toggle]
+          [Search Bar]
+        }
+
+        component "PerformanceMetrics.vue" as Metrics #DB7093 {
+          [Charts]
+          [KPI Cards]
+          [Trend Lines]
+        }
+      }
+    }
+  }
+
+  package "Tab 4: Constellations" #9370DB {
+    component "AgentLifeConstellations.vue" as Constellations #8A2BE2 {
+
+      package "Child Components" #DDA0DD {
+        component "ConstellationList.vue" as ConstList #9932CC {
+          [Preset Cards]
+          [User Constellations]
+          [Search & Filter]
+        }
+
+        component "ConstellationDesigner.vue" as Designer #8B008B {
+          [Action Palette]
+          [Canvas]
+          [Properties Panel]
+          [Flow Lines]
+        }
+
+        component "ConstellationPreview.vue" as Preview #9400D3 {
+          [Sequence Display]
+          [Action List]
+          [Validation Status]
+        }
+      }
+    }
+  }
+
+  package "Tab 5: Analytics" #FFD700 {
+    component "AgentLifeAnalytics.vue" as Analytics #FFA500 {
+
+      package "Child Components" #FFFFE0 {
+        component "CycleHistoryBrowser.vue" as History #DAA520 {
+          [Timeline View]
+          [Filter Controls]
+          [Detail Panel]
+        }
+
+        component "PerformanceCharts.vue" as Charts #FFB90F {
+          [Line Charts]
+          [Bar Charts]
+          [Pie Charts]
+          [Heatmaps]
+        }
+
+        component "CollaborationInsights.vue" as Insights #FF8C00 {
+          [Agent Metrics]
+          [Team Stats]
+          [Success Rates]
+        }
+      }
+    }
+  }
+}
+
+' Connections
+Store --> Chat : "provides state"
+Store --> Cycles : "provides state"
+Store --> Monitor : "provides state"
+Store --> Constellations : "provides state"
+Store --> Analytics : "provides state"
+
+Socket --> Monitor : "real-time events"
+Socket --> Chat : "message notifications"
+
+API --> Store : "updates state"
+Store --> API : "triggers requests"
+
+Cycles --> CycleList
+Cycles --> CycleForm
+Cycles --> ControlPanel
+
+Monitor --> ProgressView
+Monitor --> StatusDashboard
+Monitor --> LogsViewer
+Monitor --> Metrics
+
+Constellations --> ConstList
+Constellations --> Designer
+Constellations --> Preview
+
+Analytics --> History
+Analytics --> Charts
+Analytics --> Insights
+
+' Legend
+legend right
+  |= Color |= Component Type |
+  | <back:#4169E1>   </back> | Main Container |
+  | <back:#FF6347>   </back> | Shared Services |
+  | <back:#32CD32>   </back> | Chat Tab |
+  | <back:#1E90FF>   </back> | Cycles Tab |
+  | <back:#FF69B4>   </back> | Monitor Tab |
+  | <back:#9370DB>   </back> | Constellations Tab |
+  | <back:#FFD700>   </back> | Analytics Tab |
+endlegend
+
+note bottom of Store
+  **State Management**
+  - Centralized state
+  - Reactive updates
+  - Devtools integration
+  - Persistence support
+end note
+
+note bottom of Socket
+  **Real-Time Events**
+  - Connection pooling
+  - Auto-reconnect
+  - Room-based subscriptions
+  - Event throttling
+end note
+
+@enduml

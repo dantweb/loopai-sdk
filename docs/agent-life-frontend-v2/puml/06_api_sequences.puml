@@ -1,0 +1,280 @@
+@startuml Agent Life v2 - API Sequence Diagrams
+!theme vibrant
+skinparam backgroundColor #F5F5F5
+skinparam roundcorner 10
+skinparam shadowing true
+
+title Agent Life v2 - Key API Interaction Sequences
+
+== Scenario 1: Create and Start Cycle ==
+
+actor User #4169E1
+participant "Frontend" as FE #32CD32
+participant "API\n(Flask)" as API #FF8C00
+participant "Cycle\nManager" as CM #FF69B4
+participant "Constellation\nManager" as ConstM #9370DB
+participant "Database" as DB #FFD700
+participant "Action\nOrchestrator" as AO #00CED1
+
+User -> FE : Fill cycle form
+activate FE
+
+FE -> FE : Validate inputs\nclient-side
+
+FE -> API : POST /api/agentlife/cycles/\n{name, days, agents, ...}
+activate API
+
+API -> API : Authenticate\nuser (JWT)
+
+API -> CM : create_cycle(user_id, data)
+activate CM
+
+CM -> ConstM : validate_constellation_id()
+activate ConstM
+ConstM -> DB : SELECT constellation
+activate DB
+DB --> ConstM : constellation data
+deactivate DB
+ConstM --> CM : valid
+deactivate ConstM
+
+CM -> CM : Validate:\n• Days (1-30)\n• Agents exist\n• Required fields
+
+CM -> DB : INSERT cycle_configurations
+activate DB
+DB --> CM : cycle object
+deactivate DB
+
+CM --> API : cycle created
+deactivate CM
+
+API --> FE : 201 Created\n{cycle: {...}}
+deactivate API
+
+FE -> FE : Update Pinia store
+FE --> User : Show success message\nDisplay cycle in list
+deactivate FE
+
+|||
+
+User -> FE : Click "Start"
+activate FE
+
+FE -> API : POST /api/agentlife/cycles/<id>/start/
+activate API
+
+API -> CM : start_cycle(cycle_id, user_id)
+activate CM
+
+CM -> DB : INSERT cycle_executions\nstatus='queued'
+activate DB
+DB --> CM : execution object
+deactivate DB
+
+CM -> AO : queue_execution(execution_id)
+activate AO
+AO -> AO : Create background\ntask/thread
+AO --> CM : queued
+deactivate AO
+
+CM --> API : execution started
+deactivate CM
+
+API --> FE : 200 OK\n{execution: {...}}
+deactivate API
+
+FE -> FE : Navigate to\nMonitor tab
+FE -> FE : Subscribe to\nSocket.IO events
+FE --> User : Show monitoring\ndashboard
+deactivate FE
+
+== Scenario 2: Pause and Resume Cycle ==
+
+User -> FE : Click "Pause"
+activate FE
+
+FE -> FE : Confirm dialog
+
+FE -> API : POST /api/agentlife/cycles/\nexecutions/<id>/pause/
+activate API
+
+API -> CM : pause_execution(execution_id, user_id)
+activate CM
+
+CM -> DB : SELECT execution
+activate DB
+DB --> CM : execution data
+deactivate DB
+
+CM -> CM : Check status\n(must be 'running')
+
+CM -> DB : UPDATE status='paused'\npaused_at=NOW()
+activate DB
+DB --> CM : updated
+deactivate DB
+
+CM -> AO : pause_execution_signal(execution_id)
+activate AO
+AO -> AO : Set pause flag\nwait for current action
+AO --> CM : pausing
+deactivate AO
+
+CM -> CM : Broadcast Socket.IO:\ncycle_status_update
+
+CM --> API : execution paused
+deactivate CM
+
+API --> FE : 200 OK\n{execution: {status: 'paused'}}
+deactivate API
+
+FE -> FE : Update UI:\n• Disable pause button\n• Enable resume button
+FE --> User : Visual confirmation
+deactivate FE
+
+|||
+
+User -> FE : Click "Resume"
+activate FE
+
+FE -> API : POST /api/agentlife/cycles/\nexecutions/<id>/resume/
+activate API
+
+API -> CM : resume_execution(execution_id, user_id)
+activate CM
+
+CM -> DB : UPDATE status='running'
+activate DB
+DB --> CM : updated
+deactivate DB
+
+CM -> AO : resume_execution_signal(execution_id)
+activate AO
+AO -> AO : Clear pause flag\ncontinue from next action
+AO --> CM : resuming
+deactivate AO
+
+CM -> CM : Broadcast Socket.IO:\ncycle_status_update
+
+CM --> API : execution resumed
+deactivate CM
+
+API --> FE : 200 OK\n{execution: {status: 'running'}}
+deactivate API
+
+FE -> FE : Update UI:\n• Enable pause button\n• Disable resume button
+FE --> User : Execution continues
+deactivate FE
+
+== Scenario 3: Real-Time Monitoring ==
+
+participant "Socket.IO\nClient" as Socket #FF6347
+participant "Socket.IO\nServer" as SocketSrv #DC143C
+participant "Status\nAggregator" as SA #FF1493
+
+FE -> Socket : Subscribe to\nexecution updates
+activate Socket
+activate FE
+
+Socket -> SocketSrv : emit('subscribe_cycle_updates',\n{execution_id, user_id})
+activate SocketSrv
+
+SocketSrv -> SocketSrv : Join room\n'cycle_<execution_id>'
+
+SocketSrv --> Socket : Subscribed
+SocketSrv --> FE : Ready
+deactivate Socket
+
+note over FE, AO
+  Background: Cycle executing
+end note
+
+AO -> SA : Notify action started
+activate SA
+activate AO
+
+SA -> DB : INSERT log
+activate DB
+DB --> SA : logged
+deactivate DB
+
+SA -> SocketSrv : emit('agent_action_started',\ndata)
+SocketSrv --> FE : Broadcast event
+deactivate SA
+
+FE -> FE : Update Pinia store:\n• agentStatuses[agent_id]\n• Add to logs array
+
+FE -> FE : Update UI:\n• Agent card badge\n• Progress bar\n• Log viewer
+FE --> User : Real-time update
+deactivate AO
+
+|||
+
+AO -> SA : Notify action completed
+activate SA
+activate AO
+
+SA -> DB : INSERT log
+activate DB
+DB --> SA : logged
+deactivate DB
+
+SA -> DB : UPDATE execution\ncompleted_actions++
+activate DB
+DB --> SA : updated
+deactivate DB
+
+SA -> SocketSrv : emit('agent_action_completed',\ndata)
+SocketSrv --> FE : Broadcast event
+deactivate SA
+
+FE -> FE : Update store & UI
+FE --> User : Show completion
+deactivate AO
+deactivate FE
+deactivate SocketSrv
+
+== Scenario 4: Fetch Execution Logs ==
+
+User -> FE : Scroll logs viewer\nto top
+activate FE
+
+FE -> FE : Check if need\nmore logs
+
+FE -> API : GET /api/agentlife/cycles/\nexecutions/<id>/logs/\n?limit=100&offset=100
+activate API
+
+API -> CM : get_execution_logs(execution_id, ...)
+activate CM
+
+CM -> DB : SELECT * FROM logs\nWHERE execution_id=...\nLIMIT 100 OFFSET 100
+activate DB
+DB --> CM : log entries
+deactivate DB
+
+CM --> API : logs array
+deactivate CM
+
+API --> FE : 200 OK\n{logs: [...], total: 500}
+deactivate API
+
+FE -> FE : Prepend logs\nto existing array
+
+FE -> FE : Update log viewer\nscroll position
+FE --> User : Display older logs
+deactivate FE
+
+legend right
+  |= Component |= Color |
+  | <back:#4169E1>   </back> | User |
+  | <back:#32CD32>   </back> | Frontend |
+  | <back:#FF8C00>   </back> | API |
+  | <back:#FF69B4>   </back> | CycleManager |
+  | <back:#9370DB>   </back> | ConstellationManager |
+  | <back:#FFD700>   </back> | Database |
+  | <back:#00CED1>   </back> | ActionOrchestrator |
+  | <back:#FF6347>   </back> | Socket.IO Client |
+  | <back:#DC143C>   </back> | Socket.IO Server |
+  | <back:#FF1493>   </back> | StatusAggregator |
+endlegend
+
+@enduml

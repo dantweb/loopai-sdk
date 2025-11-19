@@ -1,0 +1,193 @@
+@startuml Agent Life v2 - Database ERD
+!theme vibrant
+skinparam backgroundColor #FAFAFA
+skinparam roundcorner 10
+skinparam shadowing true
+skinparam linetype ortho
+
+title Agent Life v2 - Database Entity Relationship Diagram
+
+entity "users" as users #4169E1 {
+  * **id** : INTEGER <<PK>>
+  --
+  username : VARCHAR(255)
+  email : VARCHAR(255)
+  password_hash : VARCHAR(255)
+  role : ENUM('user', 'admin')
+  created_at : TIMESTAMP
+}
+
+entity "cycle_configurations" as cycles #32CD32 {
+  * **id** : UUID <<PK>>
+  --
+  * name : VARCHAR(255)
+  description : TEXT
+  * created_by : INTEGER <<FK>>
+  * days : INTEGER
+  * agents : JSON
+  * constellation_id : UUID <<FK>>
+  --
+  action_wait_seconds : INTEGER
+  day_wait_seconds : INTEGER
+  reflection_frequency_days : INTEGER
+  --
+  scheduled_start : TIMESTAMP
+  auto_repeat : BOOLEAN
+  repeat_interval_days : INTEGER
+  --
+  status : ENUM('draft', 'scheduled', 'active', 'archived')
+  is_preset : BOOLEAN
+  is_public : BOOLEAN
+  tags : JSON
+  --
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "cycle_executions" as executions #FF6347 {
+  * **id** : UUID <<PK>>
+  --
+  * configuration_id : UUID <<FK>>
+  * status : ENUM('queued', 'running', 'paused', 'completed', 'failed', 'stopped')
+  * current_day : INTEGER
+  * total_days : INTEGER
+  current_action_index : INTEGER
+  current_action_name : VARCHAR(100)
+  --
+  queued_at : TIMESTAMP
+  started_at : TIMESTAMP
+  paused_at : TIMESTAMP
+  completed_at : TIMESTAMP
+  failed_at : TIMESTAMP
+  --
+  total_actions : INTEGER
+  completed_actions : INTEGER
+  failed_actions : INTEGER
+  skipped_actions : INTEGER
+  --
+  agent_states : JSON
+  error_message : TEXT
+  execution_metadata : JSON
+}
+
+entity "cycle_execution_logs" as logs #FFD700 {
+  * **id** : INTEGER <<PK>>
+  --
+  * execution_id : UUID <<FK>>
+  * timestamp : TIMESTAMP
+  * level : ENUM('debug', 'info', 'warning', 'error', 'critical')
+  * message : TEXT
+  --
+  agent_id : VARCHAR(100)
+  action_name : VARCHAR(100)
+  details : JSON
+}
+
+entity "action_constellations" as constellations #9370DB {
+  * **id** : UUID <<PK>>
+  --
+  * name : VARCHAR(255)
+  description : TEXT
+  created_by : INTEGER <<FK>>
+  * sequence : JSON
+  --
+  is_preset : BOOLEAN
+  is_public : BOOLEAN
+  tags : JSON
+  version : INTEGER
+  --
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "agents" as agents #FF69B4 {
+  * **id** : INTEGER <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * public_name : VARCHAR(100)
+  * city_id : VARCHAR(100)
+  address : VARCHAR(255)
+  role : VARCHAR(100)
+  status : ENUM('active', 'inactive', 'offline')
+  created_at : TIMESTAMP
+}
+
+' Relationships
+users ||--o{ cycles : "creates"
+users ||--o{ constellations : "creates"
+users ||--o{ agents : "owns"
+
+cycles ||--o{ executions : "has"
+cycles }o--|| constellations : "uses"
+
+executions ||--o{ logs : "generates"
+
+' Indexes (shown as notes)
+note right of cycles
+  **Indexes:**
+  - idx_created_by
+  - idx_status
+  - idx_created_at
+  - idx_composite (status, created_by)
+end note
+
+note right of executions
+  **Indexes:**
+  - idx_configuration_id
+  - idx_status
+  - idx_queued_at
+end note
+
+note right of logs
+  **Indexes:**
+  - idx_execution_id
+  - idx_timestamp
+  - idx_level
+end note
+
+note right of constellations
+  **Indexes:**
+  - idx_created_by
+  - idx_is_preset
+  - idx_created_at
+end note
+
+' Sample data
+note bottom of cycles
+  **Sample Cycle Configuration:**
+  {
+    "id": "abc-123",
+    "name": "3-Day Calculator Project",
+    "days": 3,
+    "agents": ["FRBG/TeacherJohn", "FRBG/zhou"],
+    "constellation_id": "standard-daily-workflow",
+    "status": "running"
+  }
+end note
+
+note bottom of constellations
+  **Sample Constellation:**
+  {
+    "id": "standard-daily-workflow",
+    "name": "Standard Daily Workflow",
+    "sequence": {
+      "actions": [
+        {"action_name": "READ_POSTS"},
+        {"type": "loop", "iterations": 3, ...}
+      ]
+    }
+  }
+end note
+
+' Legend
+legend right
+  |= Color |= Entity Type |
+  | <back:#4169E1>   </back> | Users & Auth |
+  | <back:#32CD32>   </back> | Cycle Configuration |
+  | <back:#FF6347>   </back> | Execution State |
+  | <back:#FFD700>   </back> | Logs & Audit |
+  | <back:#9370DB>   </back> | Action Config |
+  | <back:#FF69B4>   </back> | Agents |
+endlegend
+
+@enduml

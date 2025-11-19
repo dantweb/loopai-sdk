@@ -1,0 +1,135 @@
+@startuml Agent Life v2 - Implementation Timeline
+!theme vibrant
+skinparam backgroundColor #FAFAFA
+skinparam roundcorner 10
+skinparam shadowing true
+
+title Agent Life v2 - Implementation Timeline (12 Weeks)
+
+printscale weekly
+
+projectstart 2025-11-25
+
+-- Phase 1: Foundation --
+[Database Models] as P1_DB lasts 2 days and is colored in LightBlue
+[Service Layer Skeleton] as P1_Services lasts 2 days and is colored in LightBlue
+[Service Layer Skeleton] starts at P1_DB's end
+[System Presets] as P1_Presets lasts 1 day and is colored in LightBlue
+[System Presets] starts at P1_Services's end
+[Frontend Structure] as P1_FE_Structure lasts 2 days and is colored in LightGreen
+[Frontend Structure] starts at P1_DB's end
+[Pinia Store Setup] as P1_Pinia lasts 2 days and is colored in LightGreen
+[Pinia Store Setup] starts at P1_FE_Structure's end
+[Integration Testing Phase 1] as P1_Test lasts 1 day and is colored in Pink
+[Integration Testing Phase 1] starts at P1_Presets's end
+[Integration Testing Phase 1] starts at P1_Pinia's end
+
+-- Phase 2: Cycle Management --
+[CycleManager Implementation] as P2_Manager lasts 2 days and is colored in LightBlue
+[CycleManager Implementation] starts at P1_Test's end
+[API Endpoints] as P2_API lasts 2 days and is colored in LightBlue
+[API Endpoints] starts at P2_Manager's end
+[Execution Control] as P2_Control lasts 1 day and is colored in LightBlue
+[Execution Control] starts at P2_API's end
+[Cycle List & Form UI] as P2_UI_List lasts 2 days and is colored in LightGreen
+[Cycle List & Form UI] starts at P2_Manager's end
+[Cycle Control Panel UI] as P2_UI_Control lasts 2 days and is colored in LightGreen
+[Cycle Control Panel UI] starts at P2_UI_List's end
+[Integration Testing Phase 2] as P2_Test lasts 1 day and is colored in Pink
+[Integration Testing Phase 2] starts at P2_Control's end
+[Integration Testing Phase 2] starts at P2_UI_Control's end
+
+-- Phase 3: Action Constellations --
+[ConstellationManager] as P3_Manager lasts 2 days and is colored in LightBlue
+[ConstellationManager] starts at P2_Test's end
+[Constellation API] as P3_API lasts 3 days and is colored in LightBlue
+[Constellation API] starts at P3_Manager's end
+[Visual Designer (Basic)] as P3_Designer lasts 3 days and is colored in LightGreen
+[Visual Designer (Basic)] starts at P3_Manager's end
+[Constellation List UI] as P3_List lasts 2 days and is colored in LightGreen
+[Constellation List UI] starts at P3_Designer's end
+[Integration Testing Phase 3] as P3_Test lasts 1 day and is colored in Pink
+[Integration Testing Phase 3] starts at P3_API's end
+[Integration Testing Phase 3] starts at P3_List's end
+
+-- Phase 4: Real-Time Monitoring --
+[StatusAggregator Service] as P4_Status lasts 2 days and is colored in LightBlue
+[StatusAggregator Service] starts at P3_Test's end
+[ActionOrchestrator Integration] as P4_Orchestrator lasts 2 days and is colored in LightBlue
+[ActionOrchestrator Integration] starts at P4_Status's end
+[Monitoring Endpoints] as P4_API lasts 1 day and is colored in LightBlue
+[Monitoring Endpoints] starts at P4_Orchestrator's end
+[Socket.IO Integration] as P4_Socket lasts 2 days and is colored in LightGreen
+[Socket.IO Integration] starts at P4_Status's end
+[Monitoring Components] as P4_UI lasts 2 days and is colored in LightGreen
+[Monitoring Components] starts at P4_Socket's end
+[Integration Testing Phase 4] as P4_Test lasts 1 day and is colored in Pink
+[Integration Testing Phase 4] starts at P4_API's end
+[Integration Testing Phase 4] starts at P4_UI's end
+
+-- Phase 5: Analytics & Polish --
+[Analytics Backend] as P5_Backend lasts 3 days and is colored in LightBlue
+[Analytics Backend] starts at P4_Test's end
+[Analytics Frontend] as P5_Frontend lasts 2 days and is colored in LightGreen
+[Analytics Frontend] starts at P5_Backend's end
+[Performance Optimization] as P5_Perf lasts 2 days and is colored in Yellow
+[Performance Optimization] starts at P5_Frontend's end
+[UI/UX Polish] as P5_Polish lasts 2 days and is colored in Yellow
+[UI/UX Polish] starts at P5_Perf's end
+[Documentation] as P5_Docs lasts 1 day and is colored in Yellow
+[Documentation] starts at P5_Polish's end
+
+-- Phase 6: Testing & Deployment --
+[Unit Testing] as P6_Unit lasts 2 days and is colored in Pink
+[Unit Testing] starts at P5_Docs's end
+[Integration Testing] as P6_Integration lasts 2 days and is colored in Pink
+[Integration Testing] starts at P6_Unit's end
+[User Acceptance Testing] as P6_UAT lasts 1 day and is colored in Pink
+[User Acceptance Testing] starts at P6_Integration's end
+[Production Preparation] as P6_Prep lasts 2 days and is colored in Orange
+[Production Preparation] starts at P6_UAT's end
+[Production Deployment] as P6_Deploy lasts 1 day and is colored in Orange
+[Production Deployment] starts at P6_Prep's end
+[Post-Deployment Monitoring] as P6_Monitor lasts 2 days and is colored in Orange
+[Post-Deployment Monitoring] starts at P6_Deploy's end
+
+-- Milestones --
+[Foundation Complete] as M1 happens at P1_Test's end and is colored in Red
+[Cycle Management Complete] as M2 happens at P2_Test's end and is colored in Red
+[Constellations Complete] as M3 happens at P3_Test's end and is colored in Red
+[Monitoring Complete] as M4 happens at P4_Test's end and is colored in Red
+[Polish Complete] as M5 happens at P5_Docs's end and is colored in Red
+[Production Launch] as M6 happens at P6_Deploy's end and is colored in Red
+
+' Dependencies
+[P2_Manager] starts at [M1]'s end
+[P3_Manager] starts at [M2]'s end
+[P4_Status] starts at [M3]'s end
+[P5_Backend] starts at [M4]'s end
+[P6_Unit] starts at [M5]'s end
+
+legend right
+  |= Color |= Activity Type |
+  | <back:#LightBlue>   </back> | Backend Development |
+  | <back:#LightGreen>   </back> | Frontend Development |
+  | <back:#Pink>   </back> | Testing |
+  | <back:#Yellow>   </back> | Optimization & Documentation |
+  | <back:#Orange>   </back> | Deployment |
+  | <back:#Red>   </back> | Milestone |
+endlegend
+
+note bottom
+  **Key Deliverables:**
+
+  **Week 2:** Database schema, service layer, frontend structure
+  **Week 4:** Full cycle CRUD, execution control, UI components
+  **Week 6:** Constellation management, visual designer
+  **Week 8:** Real-time monitoring, Socket.IO integration
+  **Week 10:** Analytics, performance optimization, documentation
+  **Week 12:** Production deployment, monitoring
+
+  **Critical Path:** Backend services → Frontend components → Integration
+  **Buffer:** 1 week built into each phase for unexpected issues
+end note
+
+@enduml
