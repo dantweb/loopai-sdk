@@ -34,7 +34,8 @@ jobs:
             --web-branch production \
             --view-branch production \
             --core-branch production \
-            --force-http
+            --force-http \
+            --no-docker
           
           sed -i "s/POSTGRESQL_DB_USER=.*/POSTGRESQL_DB_USER=${{ secrets.POSTGRES_DB_USER }}/" .env
           sed -i "s/POSTGRESQL_DB_PASSWORD=.*/POSTGRESQL_DB_PASSWORD=${{ secrets.POSTGRES_DB_PASSWORD }}/" .env
