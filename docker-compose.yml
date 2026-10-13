@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres
+    image: postgres:17
     container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRESQL_DB_USER}
@@ -9,7 +9,7 @@ services:
       POSTGRESQL_DB_HOST: ${POSTGRESQL_DB_HOST}
       POSTGRESQL_DB_PORT: ${POSTGRESQL_DB_PORT}
     ports:
-      - "5432:5432"
+      - "${LOOPAI_DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -31,8 +31,8 @@ services:
       dockerfile: Dockerfile
     container_name: loopai_web
     ports:
-      - "5050:5000"
-      - "5678:5678"
+      - "${LOOPAI_WEB_PORT:-5050}:5000"
+      - "${LOOPAI_DEBUG_PORT:-5678}:5678"
     working_dir: /app
     volumes:
       - ./loopai_src:/app
@@ -51,7 +51,7 @@ services:
       - PYTHONUNBUFFERED=1
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-      - POSTGRESQL_DB_HOST=host.docker.internal
+      - POSTGRESQL_DB_HOST=${POSTGRESQL_DB_HOST:-postgres}
       - POSTGRESQL_DB_PORT=${POSTGRESQL_DB_PORT}
       - POSTGRESQL_DB_NAME=${POSTGRESQL_DB_NAME}
       - POSTGRESQL_DB_PASSWORD=${POSTGRESQL_DB_PASSWORD}
@@ -80,7 +80,7 @@ services:
         - VUE_APP_API_BASE_HOST=${VUE_APP_API_BASE_HOST}
     container_name: vue_admin
     ports:
-      - "8080:80"
+      - "${LOOPAI_FRONTEND_PORT:-8080}:80"
     environment:
       - VUE_APP_API_BASE_URL
       - VUE_APP_API_BASE_HOST
@@ -91,7 +91,7 @@ services:
       image: redis:latest
       container_name: redis
       ports:
-        - "6379:6379"
+        - "${LOOPAI_REDIS_PORT:-6379}:6379"
       networks:
         - debug_network
 

@@ -1,34 +1,59 @@
 # LoopAI Application
 
-## How to install
+## How to install (developer bundle)
 
-````
+Requirements: `git`, `curl`, Docker with the `docker compose` v2 plugin, and SSH access to the
+`dantweb/loopai-*` GitHub repositories (or use `--force-http`).
+
+```bash
 git clone git@github.com:dantweb/loopai-sdk.git && cd loopai-sdk
-````
-### Branch Parameters:
+./bin/install.sh --web-branch production --view-branch production --core-branch production
 ```
---web-branch <branch>: Specify the branch for the web repository.
---view-branch <branch>: Specify the branch for the view repository.
---core-branch <branch>: Specify the branch for the core repository.
---all-same <branch>: Use the same branch for all repositories.
+
+`./bin/install.sh` (also `make install`) does the whole setup and is safe to re-run:
+
+1. clones `loopai-core`, `loopai-web`, `loopai-view` into `loopai_src/{core,web,view}` - existing
+   checkouts are fast-forwarded to the requested branch (checkouts with uncommitted changes are left alone);
+2. creates `.env`, `loopai_src/.env`, `loopai_src/view/vue/admin/.env` from the `.env.dist` files if
+   missing (existing files are never overwritten, only missing keys are appended);
+3. creates the external `shared_network`, builds and starts `db`, `redis`, `loopai_web`, `frontend`;
+4. creates the databases, runs the web (alembic) and core migrations, populates agent roles/statuses,
+   creates an admin user (`admin` / `Loopai_2025!` by default);
+5. smoke-tests core, CLI, web (http://localhost:5050) and the admin frontend (http://localhost:8080).
+
+### Parameters
+```
+--web-branch <branch>    Branch for the web repository   (default: production)
+--view-branch <branch>   Branch for the view repository  (default: production)
+--core-branch <branch>   Branch for the core repository  (default: production)
+--all-same <branch>      Use the same branch for all repositories
+--force-http             Clone over HTTPS instead of SSH
+--fresh                  Wipe and re-clone existing checkouts (web/users is kept)
+--no-docker              Only clone repositories and prepare .env files
+--no-frontend            Do not build/start the Vue admin container
+--admin-login <login>    Admin user to create (default: admin)
+--admin-password <pass>  Admin password (default: Loopai_2025!)
+```
+
+Host ports are set in `./.env` (`LOOPAI_WEB_PORT=5050`, `LOOPAI_FRONTEND_PORT=8080`, `LOOPAI_DB_PORT=5432`,
+`LOOPAI_REDIS_PORT=6379`, `LOOPAI_DEBUG_PORT=5678`). If db/redis/frontend/debug ports are busy the installer
+picks free ones and saves them. The frontend API URL (`VUE_APP_API_BASE_URL`) is baked in at build time -
+change it in `./.env` and run `make upp` if you change `LOOPAI_WEB_PORT`.
+
+Python dependencies are installed in the `loopai_web` image; no virtualenv is needed inside the container.
+Add API keys (`OPENAI_API_KEY`, ...) to `./.env` / `loopai_src/.env`.
+
+### Day-to-day
+```bash
+make upp              # rebuild and start containers
+make bash             # shell in loopai_web
+make migrate          # web + core migrations
+make run_core_tests   # core unit tests
+make run_web_tests    # web unit tests
 ```
 
 ### hints
 to run wp use post url string
-
-### Example install
-```
-./bin/install.sh --web-branch production --view-branch production --core-branch production
-make upp
-make bash
-```
-inside the web (loopai_web) container:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-flask db upgrade -d web/migrations
-```
 
 ## How to deploy
 
@@ -45,7 +70,7 @@ flask db upgrade -d web/migrations
  in the backend container:
 
 ```bash
-  cd web/view/vue/admin
+  cd view/vue/admin
   npm install
   npm run serve
 ```
@@ -53,12 +78,18 @@ flask db upgrade -d web/migrations
 ### How to run loop from the command line for single user installation 
 
 ```bash
-python3 loopai_src/app.py <abs.path>/loop_config.yaml --user <userId> --loopId <loopId>
+docker compose exec -e WEB_OR_CLI=cli loopai_web python3 app.py --loop <abs.path>/loop_config.yaml --user <userId> --loopId <loopId> [--projectId <projectId>]
 ```
 
-<abs.path> - from the very root of the container or server; important to have WEB_OR_CLI=cli in the .env file
+<abs.path> - from the very root of the container (`/app/...`); `-e WEB_OR_CLI=cli` (or `WEB_OR_CLI=cli` in loopai_src/.env) is required
 <userId> - user id from the database
 <loopId> - loop id from the database
+<projectId> - optional, loads the project's env
+
+Notes for a minimal loop:
+- `session.code_source` must point to a `.py` file that defines `PROMPT_TEMPLATES = {}` and `SYSTEM_CONTENT_TEMPLATES = {}`;
+- every step needs `input: []` / `output: []` lists (may be empty);
+- relative paths (e.g. `bash_script_path: script.sh`) resolve to `var/filesystem/<userId>/loops/<loopId>/filesystem/`.
 
 Here is an example how to run a web-based loop from the command line or cronjob from inside the container. 
 In the following example the execution of the loop and all the dependence and files is exactly same as if one runs this loop from the web:

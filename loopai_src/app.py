@@ -34,7 +34,17 @@ def main():
         # Attach Socket.IO
         app = create_app()
         with app.app_context():
-            controller = LoopController(args.loop, args.user, args.projectId, args.loopId)
+            # Same session setup as the web runner (web/services/async_loop_manager.py),
+            # otherwise steps see user/loop/project as None
+            from core.services.session_manager import session_manager
+            to_int = lambda value: int(value) if value else None
+            session_manager.create_session_for_loop(
+                user_id=to_int(args.user),
+                loop_id=to_int(args.loopId),
+                project_id=to_int(args.projectId)
+            )
+
+            controller = LoopController(args.loop, to_int(args.user), to_int(args.projectId), to_int(args.loopId))
             controller.run()
     else:
         logger_service = LoggerService()
